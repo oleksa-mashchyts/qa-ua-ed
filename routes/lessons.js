@@ -48,9 +48,7 @@ router.get('/:id', getLesson, (req, res) => {
 // Видалити урок
 router.delete('/:id', getLesson, async (req, res) => {
     try {
-        await res.lesson.remove();
-        // Видаляємо ID уроку з курсу, до якого він належить
-        await Course.findByIdAndUpdate(res.lesson.courseId, { $pull: { lessons: res.lesson._id } });
+        await Lesson.findByIdAndDelete(req.params.id); // Використовуємо findByIdAndDelete
         res.json({ message: 'Lesson deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });

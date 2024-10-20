@@ -5,7 +5,7 @@ const router = express.Router();
 // Отримати всі тести
 router.get('/', async (req, res) => {
   try {
-    const tests = await Test.find().populate('lesson');
+    const tests = await Test.find().populate('lessonId');
     res.json(tests);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,8 +15,9 @@ router.get('/', async (req, res) => {
 // Створити новий тест
 router.post('/', async (req, res) => {
   const test = new Test({
-    lesson: req.body.lesson,
+    title: req.body.title, // Додайте це поле
     questions: req.body.questions,
+    lessonId: req.body.lessonId, // Змінили на lessonId
   });
 
   try {
@@ -27,4 +28,32 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+// Отримати тест за ID
+router.get('/:id', getTest, (req, res) => {
+  res.json(res.test);
+});
+
+// Оновити тест
+router.patch('/:id', getTest, async (req, res) => {
+  if (req.body.title != null) {
+    res.test.title = req.body.title;
+  }
+  if (req.body.questions != null) {
+    res.test.questions = req.body.questions;
+  }
+  if (req.body.lessonId != null) {
+    res.test.lessonId = req.body.lessonId; // Додано для оновлення
+  }
+
+  try {
+    const updatedTest = await res.test.save();
+    res.json(updatedTest);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Видалити тест
+router.delete('/:id', getTest, async (req, res) => {
+  try {
+    awa

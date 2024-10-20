@@ -1,25 +1,31 @@
 const mongoose = require('mongoose');
 
+const questionSchema = new mongoose.Schema({
+    questionText: {
+        type: String,
+        required: true,
+    },
+    options: {
+        type: [String],
+        required: true,
+    },
+    correctOption: {
+        type: Number,
+        required: true,
+    },
+});
+
 const testSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
     },
-    questions: [{
-        questionText: String,
-        options: [String],
-        correctOption: Number
-    }],
+    questions: [questionSchema], // масив запитань
     lessonId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Lesson',
-        required: true
-    }
+        required: true,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Test', testSchema);
-
-
-
-
-
