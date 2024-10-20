@@ -59,3 +59,8 @@ async function getLesson(req, res, next) {
 }
 
 module.exports = router;
+
+// models/Lesson.js
+const mongoose = require('mongoose');
+
+

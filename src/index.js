@@ -31,3 +31,7 @@ app.listen(PORT, () => {
 const lessonsRouter = require('../routes/lessons');
 app.use('/api/lessons', lessonsRouter);
 
+
+const testsRouter = require('../routes/tests');
+app.use('/api/tests', testsRouter);
+
