@@ -1,20 +1,24 @@
 const mongoose = require('mongoose');
 
 const lessonSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    content: {
-        type: String,
-        required: true
-    },
-    courseId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-        required: true
-    }
-}, { timestamps: true });
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  courseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course', // посилання на модель Course
+    required: true, // обов'язкове поле
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
 
-module.exports = mongoose.model('Lesson', lessonSchema);
-
+const Lesson = mongoose.model('Lesson', lessonSchema);
+module.exports = Lesson;

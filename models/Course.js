@@ -17,6 +17,10 @@ const courseSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  lessons: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lesson' // посилання на модель Lesson
+  }]
 });
 
 const Course = mongoose.model('Course', courseSchema);

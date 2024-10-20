@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Lesson = require('../models/Lesson');
+const Course = require('../models/Course');
 
 // Отримати всі уроки
 router.get('/', async (req, res) => {
@@ -14,14 +15,25 @@ router.get('/', async (req, res) => {
 
 // Створити новий урок
 router.post('/', async (req, res) => {
+    const { title, content, courseId } = req.body;
+
+    // Перевірка наявності поля courseId
+    if (!courseId) {
+        return res.status(400).json({ message: 'courseId is required' });
+    }
+
     const lesson = new Lesson({
-        title: req.body.title,
-        content: req.body.content,
-        courseId: req.body.courseId
+        title,
+        content,
+        courseId
     });
 
     try {
         const newLesson = await lesson.save();
+
+        // Додаємо ID нового уроку до курсу
+        await Course.findByIdAndUpdate(courseId, { $push: { lessons: newLesson._id } });
+
         res.status(201).json(newLesson);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -37,6 +49,8 @@ router.get('/:id', getLesson, (req, res) => {
 router.delete('/:id', getLesson, async (req, res) => {
     try {
         await res.lesson.remove();
+        // Видаляємо ID уроку з курсу, до якого він належить
+        await Course.findByIdAndUpdate(res.lesson.courseId, { $pull: { lessons: res.lesson._id } });
         res.json({ message: 'Lesson deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -59,8 +73,3 @@ async function getLesson(req, res, next) {
 }
 
 module.exports = router;
-
-// models/Lesson.js
-const mongoose = require('mongoose');
-
-
