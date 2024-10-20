@@ -28,6 +28,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-const lessonsRouter = require('./routes/lessons');
+const lessonsRouter = require('../routes/lessons');
 app.use('/api/lessons', lessonsRouter);
 
