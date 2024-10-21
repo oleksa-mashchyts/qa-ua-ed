@@ -21,11 +21,11 @@ const swaggerOptions = {
       schemas: {
         Course: {
           type: 'object',
-          required: ['title', 'description'],
           properties: {
             id: {
               type: 'string',
-              description: 'Унікальний ідентифікатор курсу',
+              format: 'objectId',
+              description: 'Автоматично генерується MongoDB',
             },
             title: {
               type: 'string',
@@ -35,11 +35,32 @@ const swaggerOptions = {
               type: 'string',
               description: 'Опис курсу',
             },
+            duration: {
+              type: 'number',
+              description: 'Тривалість курсу в годинах',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Дата створення курсу, генерується автоматично',
+            },
+            lessons: {
+              type: 'array',
+              items: {
+                type: 'string',
+                format: 'objectId',
+                description: 'Посилання на уроки (необов\'язково при створенні курсу)',
+              },
+            },
           },
+          required: ['title', 'description', 'duration'],
           example: {
-            id: '12345',
+            id: '61234abcdf56789e12345fgh',
             title: 'Основи програмування',
             description: 'Цей курс охоплює основи програмування.',
+            duration: 40,
+            createdAt: '2024-01-01T12:00:00.000Z',
+            lessons: ['63456abcdf56789e12345def', '63456abcdf56789e12345xyz'],
           },
         },
         Lesson: {

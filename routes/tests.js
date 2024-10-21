@@ -30,18 +30,30 @@ router.get('/', async (req, res) => {
 
 // Створити новий тест
 router.post('/', async (req, res) => {
-  const test = new Test({
-    title: req.body.title, // Додайте це поле
-    questions: req.body.questions,
-    lessonId: req.body.lessonId, // Змінили на lessonId
-  });
+    const { title, questions, lessonId } = req.body;
 
-  try {
-    const newTest = await test.save();
-    res.status(201).json(newTest);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+    // Валідація даних для створення тесту
+    const { error } = testValidation(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const test = new Test({
+        title,
+        questions,
+        lessonId
+    });
+
+    try {
+        const newTest = await test.save();
+
+        // Додаємо ID нового тесту до уроку
+        await Lesson.findByIdAndUpdate(lessonId, { $push: { tests: newTest._id } });
+
+        res.status(201).json(newTest);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 });
 
 // Отримати тест за ID
@@ -74,22 +86,31 @@ router.get('/:id', getTest, (req, res) => {
 
 // Оновити тест
 router.patch('/:id', getTest, async (req, res) => {
-  if (req.body.title != null) {
-    res.test.title = req.body.title;
-  }
-  if (req.body.questions != null) {
-    res.test.questions = req.body.questions;
-  }
-  if (req.body.lessonId != null) {
-    res.test.lessonId = req.body.lessonId; // Додано для оновлення
-  }
+    const { title, questions, lessonId } = req.body;
 
-  try {
-    const updatedTest = await res.test.save();
-    res.json(updatedTest);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+    // Валідація даних для оновлення тесту
+    const { error } = testValidation(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+    }
+
+    // Оновлення полів, якщо вони присутні в запиті
+    if (title != null) {
+        res.test.title = title;
+    }
+    if (questions != null) {
+        res.test.questions = questions;
+    }
+    if (lessonId != null) {
+        res.test.lessonId = lessonId;
+    }
+
+    try {
+        const updatedTest = await res.test.save();
+        res.json(updatedTest);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 });
 
 // Видалити тест

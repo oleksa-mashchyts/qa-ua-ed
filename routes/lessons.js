@@ -1,7 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const Lesson = require('../models/Lesson');
 const Course = require('../models/Course');
+const { lessonValidation } = require('../validators/lessonValidator'); // Імпорт валідації
+const router = express.Router();
+
 
 // Отримати всі уроки
 /**
@@ -56,6 +58,12 @@ router.post('/', async (req, res) => {
     // Перевірка наявності поля courseId
     if (!courseId) {
         return res.status(400).json({ message: 'courseId is required' });
+    }
+
+    // Валідація даних для уроку
+    const { error } = lessonValidation(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
     }
 
     const lesson = new Lesson({
@@ -131,14 +139,23 @@ async function getLesson(req, res, next) {
 
 // Оновити урок
 router.patch('/:id', getLesson, async (req, res) => {
-    if (req.body.title != null) {
-        res.lesson.title = req.body.title;
+    const { title, content, courseId } = req.body;
+
+    // Валідація даних для оновлення уроку
+    const { error } = lessonValidation(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
     }
-    if (req.body.content != null) {
-        res.lesson.content = req.body.content;
+
+    // Оновлення полів, якщо вони присутні в запиті
+    if (title != null) {
+        res.lesson.title = title;
     }
-    if (req.body.courseId != null) {
-        res.lesson.courseId = req.body.courseId;
+    if (content != null) {
+        res.lesson.content = content;
+    }
+    if (courseId != null) {
+        res.lesson.courseId = courseId;
     }
 
     try {
