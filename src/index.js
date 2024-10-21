@@ -53,6 +53,6 @@ const swaggerOptions = {
   apis: ['./routes/*.js'], // шлях до ваших маршрутизаторів
 };
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = require('../src/docs/swaggerDocs');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 

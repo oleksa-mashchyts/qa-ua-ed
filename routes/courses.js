@@ -8,6 +8,7 @@ const router = express.Router();
  * /api/courses:
  *   get:
  *     summary: Get all courses
+ *     tags: [Courses]
  *     responses:
  *       200:
  *         description: A list of courses
@@ -29,6 +30,26 @@ router.get('/', async (req, res) => {
 });
 
 // Додавання нового курсу
+/**
+ * @swagger
+ * /api/courses:
+ *   post:
+ *     summary: Create a new course
+ *     tags: [Courses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Course'
+ *     responses:
+ *       201:
+ *         description: The course was successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ */
 router.post('/', async (req, res) => {
   const course = new Course({
     title: req.body.title,
@@ -45,6 +66,29 @@ router.post('/', async (req, res) => {
 });
 
 // Отримати курс за ID
+/**
+ * @swagger
+ * /api/courses/{id}:
+ *   get:
+ *     summary: Get course by ID
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The course ID
+ *     responses:
+ *       200:
+ *         description: The course by ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Course not found
+ */
 router.get('/:id', async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);

@@ -3,6 +3,22 @@ const Test = require('../models/Test');
 const router = express.Router();
 
 // Отримати всі тести
+/**
+ * @swagger
+ * /api/tests:
+ *   get:
+ *     summary: Get all tests
+ *     tags: [Tests]
+ *     responses:
+ *       200:
+ *         description: List of all tests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Test'
+ */
 router.get('/', async (req, res) => {
   try {
     const tests = await Test.find().populate('lessonId');
@@ -29,6 +45,29 @@ router.post('/', async (req, res) => {
 });
 
 // Отримати тест за ID
+/**
+ * @swagger
+ * /api/tests/{id}:
+ *   get:
+ *     summary: Get test by ID
+ *     tags: [Tests]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The test ID
+ *     responses:
+ *       200:
+ *         description: The test by ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Test'
+ *       404:
+ *         description: Test not found
+ */
 router.get('/:id', getTest, (req, res) => {
   res.json(res.test);
 });

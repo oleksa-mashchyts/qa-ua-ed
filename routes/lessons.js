@@ -4,6 +4,22 @@ const Lesson = require('../models/Lesson');
 const Course = require('../models/Course');
 
 // Отримати всі уроки
+/**
+ * @swagger
+ * /api/lessons:
+ *   get:
+ *     summary: Get all lessons
+ *     tags: [Lessons]
+ *     responses:
+ *       200:
+ *         description: List of all lessons
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lesson'
+ */
 router.get('/', async (req, res) => {
     try {
         const lessons = await Lesson.find();
@@ -14,6 +30,26 @@ router.get('/', async (req, res) => {
 });
 
 // Створити новий урок
+/**
+ * @swagger
+ * /api/lessons:
+ *   post:
+ *     summary: Create a new lesson
+ *     tags: [Lessons]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Lesson'
+ *     responses:
+ *       201:
+ *         description: The lesson was successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lesson'
+ */
 router.post('/', async (req, res) => {
     const { title, content, courseId } = req.body;
 
@@ -41,6 +77,29 @@ router.post('/', async (req, res) => {
 });
 
 // Отримати урок за ID
+/**
+ * @swagger
+ * /api/lessons/{id}:
+ *   get:
+ *     summary: Get lesson by ID
+ *     tags: [Lessons]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The lesson ID
+ *     responses:
+ *       200:
+ *         description: The lesson by ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lesson'
+ *       404:
+ *         description: Lesson not found
+ */
 router.get('/:id', getLesson, (req, res) => {
     res.json(res.lesson);
 });
