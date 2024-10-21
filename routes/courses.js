@@ -43,28 +43,40 @@ router.get('/:id', async (req, res) => {
 });
 
 // Оновити курс
-router.put('/:id', async (req, res) => {
+router.patch('/:id', async (req, res) => {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-    res.json(course);
+      const course = await Course.findById(req.params.id);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+      if (req.body.title != null) {
+          course.title = req.body.title;
+      }
+      if (req.body.description != null) {
+          course.description = req.body.description;
+      }
+      if (req.body.duration != null) {
+          course.duration = req.body.duration;
+      }
+
+      const updatedCourse = await course.save();
+      res.json(updatedCourse);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+      res.status(400).json({ message: error.message });
   }
 });
 
 // Видалити курс
 router.delete('/:id', async (req, res) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.id);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-    res.json({ message: 'Course deleted' });
+      const course = await Course.findById(req.params.id);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+      await course.remove();
+      res.json({ message: 'Course deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
   }
 });
 

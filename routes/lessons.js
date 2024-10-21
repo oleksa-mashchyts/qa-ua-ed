@@ -70,4 +70,35 @@ async function getLesson(req, res, next) {
     next();
 }
 
+// Оновити урок
+router.patch('/:id', getLesson, async (req, res) => {
+    if (req.body.title != null) {
+        res.lesson.title = req.body.title;
+    }
+    if (req.body.content != null) {
+        res.lesson.content = req.body.content;
+    }
+    if (req.body.courseId != null) {
+        res.lesson.courseId = req.body.courseId;
+    }
+
+    try {
+        const updatedLesson = await res.lesson.save();
+        res.json(updatedLesson);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// Отримати уроки для певного курсу
+router.get('/courses/:id/lessons', async (req, res) => {
+    try {
+        const lessons = await Lesson.find({ courseId: req.params.id });
+        res.json(lessons);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 module.exports = router;

@@ -35,3 +35,7 @@ app.use('/api/lessons', lessonsRouter);
 const testsRouter = require('../routes/tests');
 app.use('/api/tests', testsRouter);
 
+const userRouter = require('../routes/users');
+app.use('/api/users', userRouter); 
+
+

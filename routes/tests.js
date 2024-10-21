@@ -78,4 +78,32 @@ async function getTest(req, res, next) {
   next();
 }
 
+// Оновити тест
+router.patch('/:id', getTest, async (req, res) => {
+    if (req.body.title != null) {
+        res.test.title = req.body.title;
+    }
+    if (req.body.questions != null) {
+        res.test.questions = req.body.questions;
+    }
+
+    try {
+        const updatedTest = await res.test.save();
+        res.json(updatedTest);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// Отримати тести для певного уроку
+router.get('/lessons/:id/tests', async (req, res) => {
+    try {
+        const tests = await Test.find({ lessonId: req.params.id });
+        res.json(tests);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 module.exports = router;
