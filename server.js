@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 
 // Налаштування статичних файлів
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client', 'public')));
 
 // Налаштування middleware для обробки JSON
 app.use(express.json());
@@ -33,8 +33,8 @@ app.use('/api/users', userRouter);
 
 // Налаштування маршруту для кореневого ендпоінту
 app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+    res.sendFile(path.join(__dirname, 'client', 'public', 'index.html'));
+  });  
 
 // Запуск сервера
 const PORT = process.env.PORT || 3000;
