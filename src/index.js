@@ -10,8 +10,8 @@ app.use(express.json());
 
 // Підключення до MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 
 // Налаштування маршруту
@@ -23,14 +23,8 @@ app.get('/', (req, res) => {
 const coursesRouter = require('../routes/courses');
 app.use('/api/courses', coursesRouter);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
 const lessonsRouter = require('../routes/lessons');
 app.use('/api/lessons', lessonsRouter);
-
 
 const testsRouter = require('../routes/tests');
 app.use('/api/tests', testsRouter);
@@ -53,6 +47,11 @@ const swaggerOptions = {
   apis: ['./routes/*.js'], // шлях до ваших маршрутизаторів
 };
 
-const swaggerDocs = require('../src/docs/swaggerDocs');
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// Вивід порту
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
