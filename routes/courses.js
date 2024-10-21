@@ -52,17 +52,28 @@ router.get('/', async (req, res) => {
  *               $ref: '#/components/schemas/Course'
  */
 router.post('/', async (req, res) => {
+  const { title, description, duration } = req.body;
+
+  // Логування отриманих даних
+  console.log('Received data:', req.body);
+
+  // Перевірка наявності поля duration
+  if (duration == null) {
+      return res.status(400).json({ message: 'Duration is required' });
+  }
+
   const course = new Course({
-    title: req.body.title,
-    description: req.body.description,
-    duration: req.body.duration,
+      title,
+      description,
+      duration
   });
 
   try {
-    const newCourse = await course.save();
-    res.status(201).json(newCourse);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+      const newCourse = await course.save();
+      res.status(201).json(newCourse);
+  } catch (err) {
+      console.error(err); // Логування помилки для діагностики
+      res.status(400).json({ message: err.message });
   }
 });
 

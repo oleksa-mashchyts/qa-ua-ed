@@ -55,12 +55,9 @@ const swaggerOptions = {
           },
           required: ['title', 'description', 'duration'],
           example: {
-            id: '61234abcdf56789e12345fgh',
             title: 'Основи програмування',
             description: 'Цей курс охоплює основи програмування.',
             duration: 40,
-            createdAt: '2024-01-01T12:00:00.000Z',
-            lessons: ['63456abcdf56789e12345def', '63456abcdf56789e12345xyz'],
           },
         },
         Lesson: {

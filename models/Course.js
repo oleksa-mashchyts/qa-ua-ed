@@ -22,9 +22,13 @@ const courseSchema = new mongoose.Schema({
     type: Number, // тривалість в годинах
     required: true,
     validate: {
-      validator: (value) => isInt(value, { min: 1 }), // Валідація на позитивне ціле число
+      validator: (value) => Number.isInteger(value) && value > 0, // Валідація на позитивне ціле число
       message: 'Duration must be a positive integer.',
     },
+    /*validate: {
+      validator: (value) => isInt(value, { min: 1 }), // Стара валідація, яка очікувала рядок, а не число
+      message: 'Duration must be a positive integer.',
+    },*/
   },
   createdAt: {
     type: Date,
