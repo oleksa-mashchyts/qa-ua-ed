@@ -5,14 +5,22 @@ async function getCourses() {
     const response = await fetch(apiUrl);
     const courses = await response.json();
     const coursesDiv = document.getElementById('courses');
-    coursesDiv.innerHTML = '';
+    coursesDiv.innerHTML = ''; // Очищуємо попередній контент
 
     courses.forEach(course => {
-        const courseElement = document.createElement('div');
-        courseElement.innerText = `${course.title}: ${course.description} (Тривалість: ${course.duration} годин)`;
-        coursesDiv.appendChild(courseElement);
+        const courseCard = document.createElement('div');
+        courseCard.classList.add('course-card'); // Додаємо клас картки
+        courseCard.innerHTML = `
+            <h3 class="course-title">${course.title}</h3>
+            <p class="course-description">${course.description}</p>
+            <p>Тривалість: ${course.duration} годин</p>
+            <a href="#" class="course-button">Деталі</a>
+        `;
+        coursesDiv.appendChild(courseCard); // Додаємо картку безпосередньо до основного div
     });
 }
+
+
 
 // Функція для додавання курсу
 document.getElementById('addCourseForm').addEventListener('submit', async (e) => {

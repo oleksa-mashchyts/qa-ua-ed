@@ -1,30 +1,125 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
-
-h1, h2 {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f7f7;
     color: #333;
-}
-
-form {
-    margin-bottom: 20px;
-}
-
-input {
-    margin: 5px;
-    padding: 10px;
-    width: 200px;
-}
-
-button {
-    padding: 10px;
-    background-color: #28a745;
+    line-height: 1.6; /* Збільшення міжрядкового інтервалу для покращення читабельності */
+  }
+  
+  
+  h1, h2, h3 {
+    color: #333;
+    font-weight: 700;
+  }
+  
+  a {
+    color: #00A5FF;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  button {
+    background-color: #00A5FF;
     color: white;
     border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тінь для кнопок */
+  }
+  
+  button:hover {
+    background-color: #007ACC;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Більша тінь при наведенні */
+  }
+  
+  
+  .container {
+    /*display: flex;*/
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    margin: 40px auto; /* Збільшуємо верхній і нижній відступ */
+    padding: 20px;
+    background-color: #fff; /* Додаємо білий фон */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  
+  .course-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Встановлюємо мінімальну ширину колонок */
+    gap: 20px; /* Відстань між картками */
+    margin-top: 30px;
 }
 
-button:hover {
-    background-color: #218838;
+.course-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    /* Встановлення мінімальної висоти для картки */
+    min-height: 150px; /* Можна змінити в залежності від контенту */
 }
+
+  
+  .course-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .course-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .course-description {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .course-button {
+    background-color: #28A745;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .course-button:hover {
+    background-color: #218838;
+  }
+  
+
+  input[type="text"], input[type="number"], textarea {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+  }
+  
+  
+  input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  button, a {
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  @media (max-width: 768px) {
+    .course-list {
+      grid-template-columns: 1fr; /* Зробить кожен курс у рядок на маленьких екранах */
+    }
+  }
+  
+
