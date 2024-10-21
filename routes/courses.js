@@ -1,6 +1,6 @@
 const express = require('express');
 const Course = require('../models/Course');
-
+const courseSchema = require('../validators/courseValidator'); // Імпортуємо валідацію
 const router = express.Router();
 
 /**
