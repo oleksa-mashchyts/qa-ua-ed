@@ -3,7 +3,6 @@ const Course = require('../models/Course');
 
 const router = express.Router();
 
-// Отримання всіх курсів
 /**
  * @swagger
  * /api/courses:
@@ -12,7 +11,14 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: A list of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
  */
+
 router.get('/', async (req, res) => {
   try {
     const courses = await Course.find();
