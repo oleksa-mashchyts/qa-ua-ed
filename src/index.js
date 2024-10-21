@@ -50,7 +50,7 @@ const swaggerOptions = {
       description: 'API Information',
     },
   },
-  apis: ['../routes/*.js'], // шлях до ваших маршрутизаторів
+  apis: ['./routes/*.js'], // шлях до ваших маршрутизаторів
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
