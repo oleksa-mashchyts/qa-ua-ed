@@ -4,6 +4,15 @@ const Course = require('../models/Course');
 const router = express.Router();
 
 // Отримання всіх курсів
+/**
+ * @swagger
+ * /api/courses:
+ *   get:
+ *     summary: Get all courses
+ *     responses:
+ *       200:
+ *         description: A list of courses
+ */
 router.get('/', async (req, res) => {
   try {
     const courses = await Course.find();

@@ -38,4 +38,21 @@ app.use('/api/tests', testsRouter);
 const userRouter = require('../routes/users');
 app.use('/api/users', userRouter); 
 
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'API Information',
+    },
+  },
+  apis: ['../routes/*.js'], // шлях до ваших маршрутизаторів
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
