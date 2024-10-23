@@ -8,49 +8,36 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'Документація для API',
       contact: {
-        name: 'Ваша команда',
-        email: 'contact@example.com',
+        name: 'QA Україна',
+        email: 'info@qaukraine.com',
       },
-      servers: [
-        {
-          url: 'http://localhost:3000', // ваш сервер
-        },
-      ],
     },
+    servers: [
+      {
+        url: 'http://localhost:3000', // Актуальний сервер
+      },
+    ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
       schemas: {
         Course: {
           type: 'object',
           properties: {
-            id: {
-              type: 'string',
-              format: 'objectId',
-              description: 'Автоматично генерується MongoDB',
-            },
-            title: {
-              type: 'string',
-              description: 'Назва курсу',
-            },
-            description: {
-              type: 'string',
-              description: 'Опис курсу',
-            },
-            duration: {
-              type: 'number',
-              description: 'Тривалість курсу в годинах',
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Дата створення курсу, генерується автоматично',
-            },
+            id: { type: 'string', format: 'objectId', description: 'MongoDB ObjectId' },
+            title: { type: 'string', description: 'Назва курсу' },
+            description: { type: 'string', description: 'Опис курсу' },
+            duration: { type: 'number', description: 'Тривалість у годинах' },
+            createdAt: { type: 'string', format: 'date-time', description: 'Дата створення' },
             lessons: {
               type: 'array',
-              items: {
-                type: 'string',
-                format: 'objectId',
-                description: 'Посилання на уроки (необов\'язково при створенні курсу)',
-              },
+              items: { type: 'string', format: 'objectId' },
+              description: 'Посилання на уроки',
             },
           },
           required: ['title', 'description', 'duration'],
@@ -62,55 +49,33 @@ const swaggerOptions = {
         },
         Lesson: {
           type: 'object',
-          required: ['title', 'content'],
           properties: {
-            id: {
-              type: 'string',
-              description: 'Унікальний ідентифікатор уроку',
-            },
-            title: {
-              type: 'string',
-              description: 'Назва уроку',
-            },
-            content: {
-              type: 'string',
-              description: 'Зміст уроку',
-            },
+            id: { type: 'string', description: 'Унікальний ідентифікатор уроку' },
+            title: { type: 'string', description: 'Назва уроку' },
+            content: { type: 'string', description: 'Зміст уроку' },
           },
+          required: ['title', 'content'],
           example: {
             id: '67890',
             title: 'Вступ до JavaScript',
-            content: 'Зміст уроку включає основи синтаксису JavaScript.',
+            content: 'Основи синтаксису JavaScript.',
           },
         },
         Test: {
           type: 'object',
-          required: ['title', 'questions'],
           properties: {
-            id: {
-              type: 'string',
-              description: 'Унікальний ідентифікатор тесту',
-            },
-            title: {
-              type: 'string',
-              description: 'Назва тесту',
-            },
+            id: { type: 'string', description: 'Унікальний ідентифікатор тесту' },
+            title: { type: 'string', description: 'Назва тесту' },
             questions: {
               type: 'array',
-              description: 'Питання для тесту',
               items: {
                 type: 'object',
                 properties: {
-                  questionText: {
-                    type: 'string',
-                    description: 'Текст питання',
-                  },
+                  questionText: { type: 'string', description: 'Текст питання' },
                   options: {
                     type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                    description: 'Можливі варіанти відповідей',
+                    items: { type: 'string' },
+                    description: 'Варіанти відповідей',
                   },
                   correctOption: {
                     type: 'number',
@@ -120,6 +85,7 @@ const swaggerOptions = {
               },
             },
           },
+          required: ['title', 'questions'],
           example: {
             id: '54321',
             title: 'Тест по JavaScript',
@@ -134,8 +100,13 @@ const swaggerOptions = {
         },
       },
     },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: ['./routes/*.js'], // шлях до ваших маршрутів
+  apis: ['./routes/*.js'], // Шлях до ваших маршрутів
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
