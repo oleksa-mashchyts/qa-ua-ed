@@ -92,12 +92,14 @@ button:hover {
   background-color: #218838;
 }
 
-input[type="text"], input[type="number"], textarea {
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1em;
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
 }
 
 input[type="submit"]:hover {

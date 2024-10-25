@@ -134,22 +134,23 @@ router.post('/register', async (req, res) => {
 
 // Маршрут для входу
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  console.log(req.body); // Перевірка даних, що надходять
+  const { email, password } = req.body; // Використовуємо email замість username
 
   try {
-    const user = await User.findOne({ username });
+    // Знаходимо користувача за email
+    const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
+    // Перевіряємо пароль
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    // Створюємо JWT-токен
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, user: { username: user.username, role: user.role } });
+    // Відправляємо токен та дані користувача (без пароля)
+    res.json({ token, user: { email: user.email, role: user.role } });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }

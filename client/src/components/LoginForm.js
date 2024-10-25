@@ -1,17 +1,10 @@
+// client/src/components/LoginForm.js
 import React, { useState } from 'react';
+import { Button, TextField, Box, Typography } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Typography,
-} from '@mui/material';
 
-const LoginForm = ({ open, onClose }) => {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+const LoginForm = () => {
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const { login } = useAuth();
   const [error, setError] = useState(null);
 
@@ -28,52 +21,55 @@ const LoginForm = ({ open, onClose }) => {
     try {
       await login(credentials);
       alert('Login successful!');
-      onClose(); // Закриваємо модальне вікно після успішного входу
     } catch (error) {
+      console.error('Login error:', error); // Додайте цей лог для перевірки помилок
+      console.log(credentials); // Переконайтеся, що всі поля заповнені правильно
       setError('Login failed. Please try again.');
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle align="center">Вхід</DialogTitle>
-      <DialogContent>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            margin="normal"
-            fullWidth
-            label="Username"
-            name="username"
-            value={credentials.username}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            label="Password"
-            type="password"
-            name="password"
-            value={credentials.password}
-            onChange={handleChange}
-            required
-          />
-          {error && (
-            <Typography color="error" align="center">
-              {error}
-            </Typography>
-          )}
-        </form>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary">
-          Відмінити
-        </Button>
-        <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-          Увійти
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        p: 3,
+        width: '100%',
+        maxWidth: 400,
+        margin: 'auto',
+      }}
+    >
+      <Typography variant="h5">Вхід</Typography>
+      <TextField
+        label="Email"
+        name="email"
+        value={credentials.email}
+        onChange={handleChange}
+        fullWidth
+        required
+      />
+      <TextField
+        label="Password"
+        name="password"
+        type="password"
+        value={credentials.password}
+        onChange={handleChange}
+        fullWidth
+        required
+      />
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        УВІЙТИ
+      </Button>
+      {error && (
+        <Typography color="error" variant="body2">
+          {error}
+        </Typography>
+      )}
+    </Box>
   );
 };
 
