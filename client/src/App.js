@@ -1,42 +1,46 @@
-import { Routes, Route } from 'react-router-dom';
+// App.js
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline, Container } from '@mui/material';
+import { lightTheme, darkTheme } from './theme';
 import Header from './components/Header';
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import LoginForm from './components/LoginForm';
+import RegisterForm from './components/RegisterForm';
 import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
-import React, { useState } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Container, Button } from '@mui/material';
-import { lightTheme, darkTheme } from './theme';
+import { AuthProvider } from './context/AuthContext'; // Переносимо сюди
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
+  const theme = isDarkMode ? darkTheme : lightTheme;
+
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <ThemeProvider theme={createTheme(theme)}>
       <CssBaseline />
-      <Container>
-        <Header />
-        <Button onClick={toggleTheme} variant="contained" sx={{ margin: '20px 0' }}>
-          Перемкнути тему
-        </Button>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute role="admin">
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Container>
+      <Router>
+        <AuthProvider>
+          <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+          <Container>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/register" element={<RegisterForm />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute role="admin">
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Container>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 };
