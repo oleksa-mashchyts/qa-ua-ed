@@ -7,6 +7,7 @@ const LoginForm = ({ onClose }) => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const { login } = useAuth(); // Використовуємо контекст для входу
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Стан для індикатора завантаження
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,15 +19,21 @@ const LoginForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Очищуємо попередню помилку
+    setLoading(true); // Вмикаємо стан завантаження
+  
     try {
-      const success = await login(credentials); // Очікуємо результат логіну
-      if (success) {
-        onClose(); // Закриваємо модальне вікно тільки у випадку успіху
-      } else {
-        setError('Login failed. Please try again.');
+      const user = await login(credentials); // Очікуємо результат логіну
+      console.log('Login successful:', user); // Діагностика результату
+  
+      if (user) {
+        onClose(); // Закриваємо модальне вікно після успіху
       }
     } catch (error) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', error); // Логування помилки для діагностики
+      setError('Невірні облікові дані. Спробуйте ще раз.');
+    } finally {
+      setLoading(false); // Вимикаємо індикатор завантаження
     }
   };
 
@@ -63,8 +70,14 @@ const LoginForm = ({ onClose }) => {
         fullWidth
         required
       />
-      <Button type="submit" variant="contained" color="primary" fullWidth>
-        УВІЙТИ
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        disabled={loading} // Блокування кнопки під час завантаження
+      >
+        {loading ? 'Вхід...' : 'УВІЙТИ'}
       </Button>
       {error && (
         <Typography color="error" variant="body2">

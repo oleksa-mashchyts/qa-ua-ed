@@ -1,70 +1,106 @@
 // client/src/components/RegisterForm.js
 import React, { useState } from 'react';
-import { TextField, Button, Container, Box, Typography, Alert } from '@mui/material';
+import { Button, TextField, Box, Typography } from '@mui/material';
 
-const RegisterForm = () => {
+const RegisterForm = ({ onClose }) => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState(null); // Додаємо стан для помилок
-  const [success, setSuccess] = useState(false); // Стан для успішної реєстрації
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Очищуємо помилки
+    setSuccess(null); // Очищуємо повідомлення про успіх
+    setLoading(true); // Вмикаємо індикатор завантаження
+
     try {
-      console.log('Submitting form data:', formData);
-      // TODO: Додайте логіку відправлення даних на сервер
-      setSuccess(true); // Встановлюємо повідомлення про успішну реєстрацію
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Помилка реєстрації');
+      }
+
+      setSuccess('Реєстрація успішна!');
+      onClose(); // Закриваємо модальне вікно після успішної реєстрації
     } catch (error) {
-      setError('Помилка реєстрації. Спробуйте ще раз.'); // Відображаємо помилку
+      setError(error.message);
+    } finally {
+      setLoading(false); // Вимикаємо індикатор завантаження
     }
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 5, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography variant="h4" align="center">
-          Реєстрація
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        p: 3,
+        width: '100%',
+        maxWidth: 400,
+        margin: 'auto',
+      }}
+    >
+      <Typography variant="h5">Реєстрація</Typography>
+      <TextField
+        label="Ім'я"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        fullWidth
+        required
+      />
+      <TextField
+        label="Email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        fullWidth
+        required
+      />
+      <TextField
+        label="Пароль"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        fullWidth
+        required
+      />
+      <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
+        {loading ? 'Реєстрація...' : 'Зареєструватися'}
+      </Button>
+      {error && (
+        <Typography color="error" variant="body2">
+          {error}
         </Typography>
-
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">Реєстрація успішна!</Alert>}
-
-        <TextField
-          label="Ім'я"
-          variant="outlined"
-          fullWidth
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Email"
-          variant="outlined"
-          fullWidth
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Пароль"
-          variant="outlined"
-          fullWidth
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
-          Зареєструватися
-        </Button>
-      </Box>
-    </Container>
+      )}
+      {success && (
+        <Typography color="primary" variant="body2">
+          {success}
+        </Typography>
+      )}
+    </Box>
   );
 };
 

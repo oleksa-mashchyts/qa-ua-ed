@@ -1,10 +1,16 @@
 body {
-  margin: 0;
-  padding: 0;
+
   font-family: 'Roboto', sans-serif;
   background-color: #f7f7f7;
   color: #333;
   line-height: 1.6;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden; /* Прибираємо горизонтальний скрол */
 }
 
 h1, h2, h3 {
@@ -37,59 +43,14 @@ button:hover {
 }
 
 .container {
+  margin-top: 60px; /* Відступ під хедер */
+  display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  max-width: 1200px;
-  margin: 40px auto;
+  min-height: calc(100vh - 60px); /* Мінімальна висота без хедера */
   padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.course-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 30px;
-}
-
-.course-card {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease-in-out;
-  min-height: 150px;
-}
-
-.course-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.course-title {
-  font-size: 1.5em;
-  margin-bottom: 10px;
-}
-
-.course-description {
-  font-size: 1em;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.course-button {
-  background-color: #28A745;
-  color: white;
-  padding: 10px 15px;
-  text-align: center;
-  border-radius: 5px;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.course-button:hover {
-  background-color: #218838;
+  box-sizing: border-box;
 }
 
 input {
@@ -114,53 +75,6 @@ button, a {
   .course-list {
     grid-template-columns: 1fr;
   }
-}
-
-/* Стилі для хедера */
-.header {
-  background-color: #ffffff;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10 20px; /* Додаємо відступи по боках */
-}
-
-.header .nav {
-  display: flex;
-  align-items: center; /* Вирівнює елементи по центру */
-  gap: 20px; /* Відстань між пунктами меню */
-  margin-left: 20px; /* Відступ від лівого краю */
-}
-
-.header .nav a {
-  margin-right: 20px; /* Додаємо простір між елементами */
-  text-decoration: none;
-  color: #333;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.header .nav .btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  text-decoration: none;
-  padding: 8px 16px; /* Зменшено внутрішні відступи для компактнішого вигляду */
-  font-size: 14px; /* Трохи менший шрифт */
-  transition: background-color 0.3s ease-in-out;
-}
-
-.header .nav .btn:hover {
-  background-color: #0056b3; /* Змінюється фон при наведенні */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкий ефект тіні */
-}
-
-/* Прибираємо підкреслення на посиланнях в хедері */
-.header .nav a:hover {
-  text-decoration: none;
 }
 
 .logo a {
@@ -226,8 +140,9 @@ button:hover {
 }
 
 .home {
-  padding: 20px;
   text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
 /* CSS для карток курсів */

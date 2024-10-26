@@ -9,7 +9,7 @@ const Home = ({ openLoginModal, openRegisterModal }) => (
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
+      height: '90vh',
       textAlign: 'center',
     }}
   >

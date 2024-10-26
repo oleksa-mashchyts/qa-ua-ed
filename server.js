@@ -57,3 +57,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+const helmet = require('helmet'); // Використовуємо Helmet для заголовків безпеки
+
+app.use(helmet());

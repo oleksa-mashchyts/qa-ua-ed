@@ -149,8 +149,17 @@ router.post('/login', async (req, res) => {
     // Створюємо JWT-токен
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-    // Відправляємо токен та дані користувача (без пароля)
-    res.json({ token, user: { email: user.email, role: user.role } });
+ // Використовуємо HTTP-only cookies для зберігання токена
+ const cookieOptions = {
+  httpOnly: true, // Робить cookie недоступними через JavaScript
+  secure: process.env.NODE_ENV === 'production', // Вимагати HTTPS у продакшн-режимі
+  sameSite: 'strict', // Захист від CSRF-атак
+  maxAge: 3600000, // Термін дії cookie - 1 година
+};
+
+res.cookie('token', token, cookieOptions); // Відправляємо токен у cookie
+res.json({ message: 'Login successful', user: { name: user.name, email: user.email, role: user.role } });
+
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -207,5 +216,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
 
 module.exports = router;

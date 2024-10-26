@@ -40,7 +40,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -88,19 +88,19 @@ const Header = ({ toggleTheme, isDarkMode }) => {
           <Typography variant="h6" component="h2" gutterBottom>
             Вхід
           </Typography>
-          <LoginForm />
+          <LoginForm onClose={() => setLoginOpen(false)} />
         </Box>
       </Modal>
 
       {/* Модальне вікно для реєстрації */}
       <Modal open={isRegisterOpen} onClose={() => setRegisterOpen(false)}>
-        <Box sx={style}>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Реєстрація
-          </Typography>
-          <RegisterForm />
-        </Box>
-      </Modal>
+  <Box sx={style}>
+    <Typography variant="h6" component="h2" gutterBottom>
+      Реєстрація
+    </Typography>
+    <RegisterForm onClose={() => setRegisterOpen(false)} />
+  </Box>
+</Modal>
     </>
   );
 };

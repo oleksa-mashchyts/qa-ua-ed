@@ -25,17 +25,18 @@ export function AuthProvider({ children }) {
       } else {
         navigate('/');
       }
+
+      return user; // Повертаємо користувача як результат логіну
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      console.error('Login failed:', error);
-      throw error;
+      throw error; // Кидаємо помилку для обробки в LoginForm
     }
   };
 
   const logout = () => {
     localStorage.removeItem('user');
     setCurrentUser(null);
-    navigate('/login');
+    navigate('/');
   };
 
   return (
