@@ -36,6 +36,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
 
   // Використовуємо контекст теми
   const { toggleColorMode, mode } = useContext(ColorModeContext);
+  console.log(currentUser); // Діагностика об'єкта користувача
 
   return (
     <>
@@ -54,7 +55,8 @@ const Header = ({ toggleTheme, isDarkMode }) => {
           {currentUser ? (
             <>
               <Typography variant="body1" sx={{ marginRight: 2 }}>
-                Вітаємо, {currentUser.name}
+                
+              Вітаємо, {currentUser.name || 'Користувачу'}!
               </Typography>
               <Button color="inherit" onClick={logout}>
                 Вийти

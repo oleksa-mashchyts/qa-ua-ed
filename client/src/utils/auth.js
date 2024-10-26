@@ -7,7 +7,7 @@ export const loginUser = async (credentials) => {
     const { token, user } = response.data;
 
     localStorage.setItem('token', token);
-    return user;
+    return user; // Повертаємо користувача з роллю
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;

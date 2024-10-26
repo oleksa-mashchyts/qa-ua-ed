@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     try {
-      const user = await loginUser(credentials);
-      setCurrentUser(user);
+      const user = await loginUser(credentials); // Виклик з файлу auth.js
+      setCurrentUser(user); // Зберігаємо користувача в стані
       localStorage.setItem('user', JSON.stringify(user));
 
       if (user.role === 'admin') {

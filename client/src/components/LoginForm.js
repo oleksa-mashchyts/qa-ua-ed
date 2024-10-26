@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Button, TextField, Box, Typography } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
-const LoginForm = () => {
+const LoginForm = ({ onClose }) => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
-  const { login } = useAuth();
+  const { login } = useAuth(); // Використовуємо контекст для входу
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
@@ -19,11 +19,13 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(credentials);
-      alert('Login successful!');
+      const success = await login(credentials); // Очікуємо результат логіну
+      if (success) {
+        onClose(); // Закриваємо модальне вікно тільки у випадку успіху
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } catch (error) {
-      console.error('Login error:', error); // Додайте цей лог для перевірки помилок
-      console.log(credentials); // Переконайтеся, що всі поля заповнені правильно
       setError('Login failed. Please try again.');
     }
   };

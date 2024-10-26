@@ -229,3 +229,13 @@ button:hover {
   padding: 20px;
   text-align: center;
 }
+
+/* CSS для карток курсів */
+.MuiCard-root {
+  margin: 16px;
+  transition: transform 0.3s;
+}
+
+.MuiCard-root:hover {
+  transform: scale(1.05);
+}
