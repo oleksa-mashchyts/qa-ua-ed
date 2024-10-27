@@ -9,8 +9,9 @@ const Home = ({ openLoginModal, openRegisterModal }) => (
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '90vh',
+      height: '100vh',
       textAlign: 'center',
+      gap: 2,
     }}
   >
     <Typography variant="h3" component="h1" gutterBottom>

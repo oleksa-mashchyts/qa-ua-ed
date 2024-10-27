@@ -12,7 +12,6 @@ import {
   IconButton, 
   Switch 
 } from '@mui/material';
-import { Brightness4, Brightness7 } from '@mui/icons-material'; // Іконки для тем
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import { ColorModeContext } from '../theme'; // Контекст для перемикання теми
