@@ -1,7 +1,7 @@
 // App.js
 import React, { useState } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Container } from '@mui/material';
-import { Routes, Route } from 'react-router-dom'; // Видалили зайвий BrowserRouter тут
+import { Routes, Route } from 'react-router-dom';
 import { lightTheme, darkTheme } from './theme';
 import Header from './components/Header';
 import Home from './pages/Home';
