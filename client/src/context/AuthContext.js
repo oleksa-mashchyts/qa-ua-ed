@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     try {
-      const user = await loginUser(credentials); // Виклик з файлу auth.js
-      setCurrentUser(user); // Зберігаємо користувача в стані
+      const user = await loginUser(credentials);
+      setCurrentUser(user);
       localStorage.setItem('user', JSON.stringify(user));
 
       if (user.role === 'admin') {
@@ -25,11 +25,10 @@ export function AuthProvider({ children }) {
       } else {
         navigate('/');
       }
-
-      return user; // Повертаємо користувача як результат логіну
+      return user;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      throw error; // Кидаємо помилку для обробки в LoginForm
+      throw error;
     }
   };
 

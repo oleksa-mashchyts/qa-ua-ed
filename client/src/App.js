@@ -35,9 +35,10 @@ const App = () => {
               <Route index element={<Navigate to="home" />} />
               <Route path="home" element={<Typography variant="h5">Головна</Typography>} />
               <Route path="courses" element={<Courses />} />
-              <Route path="students" element={<div>Список студентів</div>} />
+              <Route path="students" element={<div>Список студенттів</div>} />
               <Route path="questions" element={<div>Список запитань</div>} />
               <Route path="statistics" element={<div>Статистика</div>} />
+              <Route path="tasks" element={<div>Завдання для вчителя</div>} />
             </Route>
           </Routes>
         </Box>

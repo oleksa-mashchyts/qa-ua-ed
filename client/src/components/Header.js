@@ -8,8 +8,7 @@ import {
   Typography, 
   Button, 
   Modal, 
-  Box, 
-  IconButton, 
+  Box,
   Switch 
 } from '@mui/material';
 import LoginForm from './LoginForm';
