@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 // Реєстрація нового користувача
 router.post('/register', async (req, res) => {
@@ -29,6 +30,26 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Отримати всіх студентів
+router.get('/students', async (req, res) => {
+    try {
+        const students = await User.find({ role: 'student' });
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Отримати всіх вчителів
+router.get('/teachers', async (req, res) => {
+    try {
+        const teachers = await User.find({ role: 'teacher' });
+        res.json(teachers);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Отримати профіль користувача
 router.get('/:id', getUser, (req, res) => {
     res.json(res.user);
@@ -36,6 +57,10 @@ router.get('/:id', getUser, (req, res) => {
 
 // Middleware для отримання користувача по ID
 async function getUser(req, res, next) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
     let user;
     try {
         user = await User.findById(req.params.id);
@@ -48,5 +73,8 @@ async function getUser(req, res, next) {
     res.user = user;
     next();
 }
+
+
+
 
 module.exports = router;

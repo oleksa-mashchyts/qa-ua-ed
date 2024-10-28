@@ -7,11 +7,13 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Додаємо стан завантаження
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser) setCurrentUser(storedUser);
+    setIsLoading(false); // Завершуємо завантаження
   }, []);
 
   const login = async (credentials) => {
@@ -19,12 +21,7 @@ export function AuthProvider({ children }) {
       const user = await loginUser(credentials);
       setCurrentUser(user);
       localStorage.setItem('user', JSON.stringify(user));
-
-      if (user.role === 'admin') {
-        navigate('/dashboard');
-      } else {
-        navigate('/');
-      }
+      navigate('/dashboard');
       return user;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
@@ -39,7 +36,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

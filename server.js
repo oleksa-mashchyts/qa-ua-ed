@@ -2,19 +2,18 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet'); // Використовуємо Helmet для заголовків безпеки
 require('dotenv').config(); // Для використання змінних середовища з .env файлу
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./src/docs/swaggerDocs'); // Імпортуємо налаштування Swagger
-const authRouter = require('./routes/auth');
 
 
 const app = express();
 
+app.use(helmet());
 // Налаштування CORS
 app.use(cors());
 
-// Налаштування статичних файлів
-app.use(express.static(path.join(__dirname, 'client', 'public')));
 
 // Налаштування middleware для обробки JSON
 app.use(express.json());
@@ -24,8 +23,11 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
+// Налаштування статичних файлів
+//app.use(express.static(path.join(__dirname, 'client', 'public')));
 
 // Ваші маршрути
+const authRouter = require('./routes/auth');
 const coursesRouter = require('./routes/courses');
 const lessonsRouter = require('./routes/lessons');
 const testsRouter = require('./routes/tests');
@@ -58,6 +60,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-const helmet = require('helmet'); // Використовуємо Helmet для заголовків безпеки
 
-app.use(helmet());
+
+

@@ -7,13 +7,18 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 240;
 
 const Dashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, isLoading } = useAuth(); // Додаємо isLoading
   const location = useLocation();
+
+  if (isLoading) {
+    return <Typography>Loading...</Typography>; // Показуємо "Loading" поки завантаження не завершено
+  }
 
   const adminPages = [
     { name: 'Головна', path: 'home' },
     { name: 'Курси', path: 'courses' },
     { name: 'Студенти', path: 'students' },
+    { name: 'Вчителя', path: 'teachers' },
     { name: 'Запитання', path: 'questions' },
     { name: 'Статистика', path: 'statistics' },
   ];

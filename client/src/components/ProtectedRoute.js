@@ -4,7 +4,9 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, role }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, isLoading } = useAuth();
+
+  if (isLoading) return <div>Loading...</div>; // Чекаємо, поки користувач завантажиться
 
   if (!currentUser) {
     return <Navigate to="/" replace />;

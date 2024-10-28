@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
+import { useAuth } from '../context/AuthContext'; // Додаємо useAuth
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [newCourse, setNewCourse] = useState({ title: '', description: '', duration: '' });
+  const { isLoading, currentUser } = useAuth(); // Отримуємо isLoading та currentUser
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -16,8 +18,11 @@ const Courses = () => {
         console.error('Error fetching courses:', error);
       }
     };
-    fetchCourses();
-  }, []);
+
+    if (!isLoading && currentUser) {
+      fetchCourses(); // Виконуємо запит лише після завершення завантаження користувача
+    }
+  }, [isLoading, currentUser]);
 
   const handleAddCourse = async (e) => {
     e.preventDefault();
