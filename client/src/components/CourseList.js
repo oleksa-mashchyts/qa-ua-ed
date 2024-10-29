@@ -3,6 +3,7 @@ import { Card, CardContent, Typography, CardActions, Box, IconButton } from '@mu
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CardMedia from '@mui/material/CardMedia';
 
 const CourseList = ({ courses, onDelete, onEdit, onEnter }) => {
   if (courses.length === 0) {
@@ -14,6 +15,12 @@ const CourseList = ({ courses, onDelete, onEdit, onEnter }) => {
       {courses.map((course) => (
         <Card key={course._id} sx={{ width: 400, mb: 2 }}>
           <CardContent>
+          <CardMedia
+          component="img"
+          height="140"
+          image="https://mui.com/static/images/cards/contemplative-reptile.jpg"
+          alt="green iguana"
+        />
             <Typography variant="h5" component="div">
               {course.title}
             </Typography>

@@ -1,5 +1,4 @@
-// client/src/components/Header.js
-import React, { useState, useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -13,7 +12,8 @@ import {
 } from '@mui/material';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
-import { ColorModeContext } from '../theme'; // Контекст для перемикання теми
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import IconButton from '@mui/material/IconButton';
 
 const style = {
   position: 'absolute',
@@ -74,6 +74,18 @@ const Header = ({ toggleTheme, isDarkMode }) => {
           onChange={toggleTheme}
           inputProps={{ 'aria-label': 'toggle theme' }}
         />
+        <div>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              
+            </div>
         </Toolbar>
       </AppBar>
 
