@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +26,11 @@ const Courses = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({ title: '', description: '', duration: '' });
   const { isLoading, currentUser } = useAuth();
+  const navigate = useNavigate(); // Навігація через useNavigate
+
+  const handleEnterCourse = (courseId) => {
+    navigate(`/courses/${courseId}`); // Перехід на сторінку курсу
+  };
 
   // Завантаження курсів із сервера
   const fetchCourses = async () => {
@@ -123,7 +129,12 @@ const Courses = () => {
         Додати курс
       </CustomButton>
 
-      <CourseList courses={courses} onDelete={handleOpenConfirm} onEdit={handleOpen} />
+      <CourseList 
+      courses={courses} 
+      onDelete={handleOpenConfirm} 
+      onEdit={handleOpen}
+      onEnter={handleEnterCourse}
+     />
 
       <CustomModal
         open={open}

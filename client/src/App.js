@@ -10,21 +10,22 @@ import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Teachers from './pages/Teachers';
 import Courses from './pages/Courses';
+import CourseDetails from './pages/CourseDetails'; // Додаємо нову сторінку
 import { useAuth } from './context/AuthContext';
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { currentUser, isLoading } = useAuth(); // Додаємо isLoading
+  const { currentUser, isLoading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); // Додаємо location для перевірки шляху
+  const location = useLocation();
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   const theme = isDarkMode ? darkTheme : lightTheme;
 
-  // Виконуємо редирект лише після того, як користувач завантажився
+  // Виконуємо редирект на дашборд, якщо користувач авторизований і знаходиться на кореневому маршруті
   useEffect(() => {
     if (!isLoading && currentUser && location.pathname === '/') {
-      navigate('/dashboard'); // Перенаправляємо на дашборд
+      navigate('/dashboard'); // Редирект на дашборд
     }
   }, [isLoading, currentUser, location.pathname, navigate]);
 
@@ -35,6 +36,7 @@ const App = () => {
       <Box sx={{ height: '100vh' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          
           <Route
             path="/dashboard/*"
             element={
@@ -49,6 +51,18 @@ const App = () => {
             <Route path="students" element={<Students />} />
             <Route path="teachers" element={<Teachers />} />
           </Route>
+
+          {/* Новий маршрут для сторінки деталей курсу */}
+          <Route
+            path="/courses/:courseId"
+            element={
+              <ProtectedRoute role="admin">
+                <CourseDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Редирект на дашборд або головну залежно від авторизації */}
           <Route path="*" element={<Navigate to={currentUser ? "/dashboard" : "/"} />} />
         </Routes>
       </Box>

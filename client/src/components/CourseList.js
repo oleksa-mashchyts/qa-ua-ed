@@ -1,11 +1,10 @@
-// client/src/components/CourseList.js
 import React from 'react';
 import { Card, CardContent, Typography, CardActions, Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CustomButton from '../components/CustomButton';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-const CourseList = ({ courses, onDelete, onEdit }) => {
+const CourseList = ({ courses, onDelete, onEdit, onEnter }) => {
   if (courses.length === 0) {
     return <Typography variant="h6">Курси відсутні.</Typography>;
   }
@@ -26,6 +25,9 @@ const CourseList = ({ courses, onDelete, onEdit }) => {
             </Typography>
           </CardContent>
           <CardActions>
+          <IconButton color="default" onClick={() => onEnter(course._id)}>
+              <ArrowForwardIcon />
+            </IconButton>
           <IconButton color="primary" onClick={() => onEdit(course)}>
               <EditIcon />
             </IconButton>

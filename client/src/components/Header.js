@@ -32,9 +32,6 @@ const Header = ({ toggleTheme, isDarkMode }) => {
   const [isLoginOpen, setLoginOpen] = React.useState(false);
   const [isRegisterOpen, setRegisterOpen] = React.useState(false);
 
-  // Використовуємо контекст теми
-  const { toggleColorMode, mode } = useContext(ColorModeContext);
-  console.log(currentUser); // Діагностика об'єкта користувача
 
   return (
     <>
