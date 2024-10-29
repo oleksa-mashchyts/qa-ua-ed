@@ -46,7 +46,20 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#90caf9',
+      main: '#90caf9', // Основний колір кнопки
+      contrastText: '#fff', // Колір тексту на кнопці
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        containedPrimary: {
+          '&:hover': {
+            backgroundColor: '#64b5f6', // Колір при наведенні для темної теми
+          },
+        },
+      },
     },
   },
 });

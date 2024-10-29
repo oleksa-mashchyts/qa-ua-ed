@@ -1,6 +1,9 @@
 // client/src/components/CourseList.js
 import React from 'react';
-import { Card, CardContent, Typography, CardActions, Button, Box } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CustomButton from '../components/CustomButton';
 
 const CourseList = ({ courses, onDelete, onEdit }) => {
   if (courses.length === 0) {
@@ -23,12 +26,12 @@ const CourseList = ({ courses, onDelete, onEdit }) => {
             </Typography>
           </CardContent>
           <CardActions>
-            <Button size="small" onClick={() => onEdit(course)}>
-              Редагувати
-            </Button>
-            <Button size="small" color="error" onClick={() => onDelete(course._id)}>
-              Видалити
-            </Button>
+          <IconButton color="primary" onClick={() => onEdit(course)}>
+              <EditIcon />
+            </IconButton>
+            <IconButton color="error" onClick={() => onDelete(course._id)}>
+              <DeleteIcon />
+            </IconButton>
           </CardActions>
         </Card>
       ))}

@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
-import { useAuth } from '../context/AuthContext'; 
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
+import CustomButton from '../components/CustomButton';
+import { 
+    Box, 
+    Button, 
+    TextField, 
+    Typography, 
+    Dialog, 
+    DialogActions, 
+    DialogContent, 
+    DialogContentText, 
+    DialogTitle 
+} from '@mui/material';
 import CustomModal from '../components/CustomModal';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
-  const [open, setOpen] = useState(false); 
-  const [isEditing, setIsEditing] = useState(false); 
-  const [editingCourse, setEditingCourse] = useState(null); 
+  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false); // Стан для підтвердження видалення
+  const [courseToDelete, setCourseToDelete] = useState(null); // ID курсу для видалення
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({ title: '', description: '', duration: '' });
-  const { isLoading, currentUser } = useAuth(); 
+  const { isLoading, currentUser } = useAuth();
 
-  // Функція для завантаження курсів
+  // Завантаження курсів із сервера
   const fetchCourses = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/courses');
@@ -25,11 +38,11 @@ const Courses = () => {
 
   useEffect(() => {
     if (!isLoading && currentUser) {
-      fetchCourses(); 
+      fetchCourses();
     }
   }, [isLoading, currentUser]);
 
-  // Збереження нового або відредагованого курсу
+  // Збереження курсу
   const handleSaveCourse = async (e) => {
     e.preventDefault();
     try {
@@ -53,15 +66,30 @@ const Courses = () => {
     }
   };
 
-  const handleDeleteCourse = async (id) => {
+  // Видалення курсу
+  const handleDeleteCourse = async () => {
     try {
-      await axios.delete(`http://localhost:3000/api/courses/${id}`);
-      setCourses((prevCourses) => prevCourses.filter((course) => course._id !== id));
+      await axios.delete(`http://localhost:3000/api/courses/${courseToDelete}`);
+      setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseToDelete));
+      handleCloseConfirm(); // Закриваємо діалог підтвердження
     } catch (error) {
       console.error('Error deleting course:', error);
     }
   };
 
+  // Відкриття діалогу підтвердження
+  const handleOpenConfirm = (id) => {
+    setCourseToDelete(id); // Зберігаємо ID курсу
+    setConfirmOpen(true); // Відкриваємо діалог
+  };
+
+  // Закриття діалогу підтвердження
+  const handleCloseConfirm = () => {
+    setConfirmOpen(false); // Закриваємо діалог
+    setCourseToDelete(null); // Очищуємо стан
+  };
+
+  // Відкриття форми для додавання/редагування
   const handleOpen = (course = null) => {
     if (course) {
       setIsEditing(true);
@@ -91,11 +119,11 @@ const Courses = () => {
   return (
     <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>Список курсів</Typography>
-      <Button variant="contained" onClick={() => handleOpen()} sx={{ mb: 2 }}>
+      <CustomButton onClick={() => handleOpen()} sx={{ mb: 2 }}>
         Додати курс
-      </Button>
+      </CustomButton>
 
-      <CourseList courses={courses} onDelete={handleDeleteCourse} onEdit={handleOpen} />
+      <CourseList courses={courses} onDelete={handleOpenConfirm} onEdit={handleOpen} />
 
       <CustomModal
         open={open}
@@ -131,11 +159,26 @@ const Courses = () => {
             required
             margin="normal"
           />
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+          <CustomButton type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
             {isEditing ? 'Зберегти зміни' : 'Додати курс'}
-          </Button>
+          </CustomButton>
         </form>
       </CustomModal>
+
+      <Dialog open={confirmOpen} onClose={handleCloseConfirm}>
+        <DialogTitle>Підтвердження видалення</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Ви впевнені, що хочете видалити цей курс? Цю дію неможливо скасувати.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm}>Ні</Button>
+          <Button onClick={handleDeleteCourse} color="error" autoFocus>
+            Так
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

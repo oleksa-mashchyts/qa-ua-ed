@@ -1,28 +1,32 @@
 // components/CustomModal.js
 import React from 'react';
-import { Modal, Box, Typography, IconButton } from '@mui/material';
+import { Modal, Box, Typography, IconButton, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const CustomModal = ({ open, onClose, title, children }) => {
+const CustomModal = ({ open, onClose, title, children, ...props }) => {
+  const theme = useTheme(); // Отримуємо поточну тему
+
+  // Вибір кольору залежно від теми
+  const backgroundColor = theme.palette.mode === 'dark' ? '#393939' : 'background.paper';
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} {...props}>
       <Box
         sx={{
-          position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 400,
-          bgcolor: 'background.paper',
+          bgcolor: backgroundColor, // Динамічний фон для темної/світлої теми
+          color: 'text.primary',
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-          border: '2px solid',
-          borderColor: 'primary.main',
+          /*border: '2px solid',
+          borderColor: 'primary.main',*/
           position: 'relative',
         }}
       >
-        {/* Хрестик для закриття модального вікна */}
         <IconButton
           onClick={onClose}
           sx={{ position: 'absolute', top: 8, right: 8 }}
@@ -30,14 +34,12 @@ const CustomModal = ({ open, onClose, title, children }) => {
           <CloseIcon />
         </IconButton>
 
-        {/* Заголовок модального вікна */}
         {title && (
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
         )}
 
-        {/* Вміст модального вікна */}
         {children}
       </Box>
     </Modal>
