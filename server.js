@@ -12,7 +12,16 @@ const app = express();
 
 app.use(helmet());
 // Налаштування CORS
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', (req, res) => {
+  res.sendStatus(204); // Відповідь на preflight-запит
+});
+
 
 
 // Налаштування middleware для обробки JSON
@@ -22,6 +31,15 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
+
+    mongoose.connection.on('error', (err) => {
+      console.error('Помилка підключення до MongoDB:', err);
+    });
+    
+    mongoose.connection.once('open', () => {
+      console.log('Підключено до MongoDB');
+    });
+    
 
 // Налаштування статичних файлів
 //app.use(express.static(path.join(__dirname, 'client', 'public')));
@@ -50,7 +68,9 @@ app.get('/', (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Головний маршрут для React (якщо інші не спрацювали)
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
+  console.log(`${req.method} ${req.url} - Body:`, req.body);
+  next();
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
   });
 

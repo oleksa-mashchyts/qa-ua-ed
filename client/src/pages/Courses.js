@@ -29,8 +29,9 @@ const Courses = () => {
   const navigate = useNavigate(); // Навігація через useNavigate
 
   const handleEnterCourse = (courseId) => {
-    navigate(`/courses/${courseId}`); // Перехід на сторінку курсу
+    navigate(`/dashboard/courses/${courseId}`);
   };
+  
 
   // Завантаження курсів із сервера
   const fetchCourses = async () => {
@@ -48,6 +49,7 @@ const Courses = () => {
     }
   }, [isLoading, currentUser]);
 
+  
   // Збереження курсу
   const handleSaveCourse = async (e) => {
     e.preventDefault();

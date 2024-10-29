@@ -3,6 +3,7 @@ const Lesson = require('../models/Lesson');
 const Course = require('../models/Course');
 const { lessonValidation } = require('../validators/lessonValidator'); // Імпорт валідації
 const router = express.Router();
+const mongoose = require('mongoose');
 
 
 // Отримати всі уроки
@@ -53,36 +54,35 @@ router.get('/', async (req, res) => {
  *               $ref: '#/components/schemas/Lesson'
  */
 router.post('/', async (req, res) => {
+    console.log('Запит на створення уроку:', req.body); // Логування
+
     const { title, content, courseId } = req.body;
 
-    // Перевірка наявності поля courseId
     if (!courseId) {
+        console.log('Помилка: Відсутній courseId');
         return res.status(400).json({ message: 'courseId is required' });
     }
 
-    // Валідація даних для уроку
-    const { error } = lessonValidation(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+        console.log('Невалідний courseId:', courseId);
+        return res.status(400).json({ message: 'Invalid courseId format' });
     }
-
-    const lesson = new Lesson({
-        title,
-        content,
-        courseId
-    });
 
     try {
-        const newLesson = await lesson.save();
-
-        // Додаємо ID нового уроку до курсу
-        await Course.findByIdAndUpdate(courseId, { $push: { lessons: newLesson._id } });
-
+        const newLesson = new Lesson({ title, content, courseId });
+        await newLesson.save();
+        console.log('Новий урок успішно створено:', newLesson);
         res.status(201).json(newLesson);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        console.error('Помилка при створенні уроку:', error);
+        res.status(500).json({ message: 'Не вдалося створити урок' });
     }
 });
+
+module.exports = router;
+  
+  
+
 
 // Отримати урок за ID
 /**

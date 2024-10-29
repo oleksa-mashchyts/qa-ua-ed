@@ -1,4 +1,3 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Typography, Box } from '@mui/material';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
@@ -10,7 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Teachers from './pages/Teachers';
 import Courses from './pages/Courses';
-import CourseDetails from './pages/CourseDetails'; // Додаємо нову сторінку
+import CourseDetails from './pages/CourseDetails';
 import { useAuth } from './context/AuthContext';
 
 const App = () => {
@@ -50,18 +49,11 @@ const App = () => {
             <Route path="courses" element={<Courses />} />
             <Route path="students" element={<Students />} />
             <Route path="teachers" element={<Teachers />} />
-          </Route>
+          
 
           {/* Новий маршрут для сторінки деталей курсу */}
-          <Route
-            path="/courses/:courseId"
-            element={
-              <ProtectedRoute role="admin">
-                <CourseDetails />
-              </ProtectedRoute>
-            }
-          />
-
+          <Route path="courses/:courseId" element={<CourseDetails />} />
+          </Route>
           {/* Редирект на дашборд або головну залежно від авторизації */}
           <Route path="*" element={<Navigate to={currentUser ? "/dashboard" : "/"} />} />
         </Routes>
