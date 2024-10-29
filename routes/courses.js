@@ -137,17 +137,29 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!course) {
+      return res.status(404).json({ message: 'Курс не знайдено' });
+    }
+    res.status(200).json(course);
+  } catch (error) {
+    res.status(500).json({ message: 'Сталася помилка при оновленні курсу' });
+  }
+});
+
 // Видалити курс
 router.delete('/:id', async (req, res) => {
   try {
-      const course = await Course.findById(req.params.id);
-      if (!course) {
-          return res.status(404).json({ message: 'Course not found' });
-      }
-      await course.remove();
-      res.json({ message: 'Course deleted' });
+    const course = await Course.findByIdAndDelete(req.params.id); // Видаляємо курс
+    if (!course) {
+      return res.status(404).json({ message: 'Курс не знайдено' });
+    }
+    res.status(200).json({ message: 'Курс успішно видалено' });
   } catch (error) {
-      res.status(500).json({ message: error.message });
+    console.error('Помилка видалення курсу:', error);
+    res.status(500).json({ message: 'Сталася помилка на сервері' });
   }
 });
 
