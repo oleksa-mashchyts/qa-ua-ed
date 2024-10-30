@@ -8,7 +8,11 @@ const Modal = ({ isOpen, onClose, children }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <CustomButton className="modal-close" onClick={onClose} variant="outlined">
+        <CustomButton 
+          onClick={onClose} 
+          variant="outlined" 
+          sx={{ position: 'absolute', top: 10, right: 10 }}
+        >
           &times;
         </CustomButton>
         {children}

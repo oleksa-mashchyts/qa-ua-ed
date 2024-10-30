@@ -42,11 +42,11 @@ const Header = ({ toggleTheme, isDarkMode }) => {
               Головна
             </Link>
           </Typography>
-
+          {/*
           <Button color="inherit" component={Link} to="/courses">
             Курси
           </Button>
-
+            */}
           {currentUser ? (
             <>
               <Typography variant="body1" sx={{ marginRight: 2 }}>

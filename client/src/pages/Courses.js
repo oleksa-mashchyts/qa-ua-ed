@@ -179,7 +179,7 @@ const Courses = () => {
       </CustomModal>
 
       <Dialog open={confirmOpen} onClose={handleCloseConfirm}>
-        <DialogTitle>Підтвердження видалення</DialogTitle>
+        <DialogTitle sx={{ color: 'text.primary' }}>Підтвердження видалення</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Ви впевнені, що хочете видалити цей курс? Цю дію неможливо скасувати.

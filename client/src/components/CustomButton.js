@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@mui/material';
 
-const CustomButton = ({ children, className, color = 'primary', onClick, ...props }) => {
+const CustomButton = ({ children,  className, variant = 'outlined', color = 'primary', onClick, ...props }) => {
   return (
     <Button
       variant="outlined"

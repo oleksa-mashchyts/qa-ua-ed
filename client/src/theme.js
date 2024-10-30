@@ -50,6 +50,9 @@ export const darkTheme = createTheme({
       contrastText: '#fff', // Колір тексту на кнопці
       fontWeight: 600,
     },
+    text: {
+      primary: '#ffffff', // Основний колір тексту білим
+    },
   },
   components: {
     MuiButton: {

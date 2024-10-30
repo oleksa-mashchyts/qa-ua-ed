@@ -29,7 +29,7 @@ const App = () => {
   }, [isLoading, currentUser, location.pathname, navigate]);
 
   return (
-    <ThemeProvider theme={createTheme(theme)}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
       <Box sx={{ height: '100vh' }}>
