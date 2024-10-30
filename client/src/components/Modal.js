@@ -1,15 +1,16 @@
 import React from 'react';
 import './Modal.css'; // Стилі для модального вікна
+import CustomButton from '../components/CustomButton';
 
 const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null; // Не показувати, якщо модальне вікно закрите
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>
+        <CustomButton className="modal-close" onClick={onClose} variant="outlined">
           &times;
-        </button>
+        </CustomButton>
         {children}
       </div>
     </div>

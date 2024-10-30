@@ -59,6 +59,14 @@ export const darkTheme = createTheme({
             backgroundColor: '#64b5f6', // Колір при наведенні для темної теми
           },
         },
+        outlined: {
+          borderColor: '#90caf9', // Колір рамки
+          color: '#90caf9', // Колір тексту
+          '&:hover': {
+            backgroundColor: 'rgba(144, 202, 249, 0.1)', // Колір фону при наведенні
+            borderColor: '#64b5f6', // Колір рамки при наведенні
+          },
+        },
       },
     },
   },

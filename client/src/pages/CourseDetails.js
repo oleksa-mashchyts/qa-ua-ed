@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { 
-  Box, Typography, Button, TextField, Table, TableBody, 
+  Box, Typography, TextField, Table, TableBody, 
   TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, List, ListItem 
 } from '@mui/material';
 import { format } from 'date-fns';
+import CustomButton from '../components/CustomButton';
 
 const CourseDetails = () => {
   const { courseId } = useParams(); // Отримуємо ID курсу з URL
@@ -66,13 +67,12 @@ const CourseDetails = () => {
         fullWidth
         sx={{ mt: 2 }}
       />
-      <Button
-        variant="contained"
+      <CustomButton
         sx={{ mt: 2 }}
         onClick={handleAddLesson}
       >
         Додати урок
-      </Button>
+      </CustomButton>
 
       <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>Уроки</Typography>
 
