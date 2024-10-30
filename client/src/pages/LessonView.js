@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReactQuill from "react-quill"; // Імпортуємо редактор
+import "react-quill/dist/quill.snow.css"; // Підключаємо стилі
 import {
   Box,
   Typography,
   TextField,
   IconButton,
+  Tooltip,
   List,
   ListItem,
   ListItemButton,
@@ -19,17 +22,15 @@ import CancelIcon from "@mui/icons-material/Cancel";
 const LessonView = () => {
   const { lessonId, courseId } = useParams();
   const navigate = useNavigate();
+  const quillRef = useRef(null); // Створюємо реф для Quill редактора
 
-  // Стан для збереження списку уроків та поточного уроку
   const [cachedLessons, setCachedLessons] = useState([]);
   const [lesson, setLesson] = useState(null);
-
-  // Локальний стан для редагування назви уроку
   const [newTitle, setNewTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState(""); // Стан для контенту
 
-  // Функція для завантаження уроку за його ID
   const fetchLesson = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -37,17 +38,16 @@ const LessonView = () => {
       );
       setLesson(response.data);
       setNewTitle(response.data.title);
+      setContent(response.data.content); // Ініціалізуємо контент
     } catch (error) {
       console.error("Error fetching lesson:", error);
     }
   }, [lessonId]);
 
-  // Завантажуємо урок при зміні `lessonId`
   useEffect(() => {
     fetchLesson();
   }, [fetchLesson]);
 
-  // Завантажуємо список уроків лише один раз
   useEffect(() => {
     const fetchLessons = async () => {
       try {
@@ -60,62 +60,170 @@ const LessonView = () => {
       }
     };
 
-    if (!cachedLessons || cachedLessons.length === 0) {
-      fetchLessons();
-    }
+    if (!cachedLessons.length) fetchLessons();
   }, [courseId, cachedLessons]);
 
-    // Функція для збереження тільки назви уроку
-const handleSaveTitle = async () => {
-  console.log("Saving lesson title..."); // Лог для перевірки
-  try {
-    const response = await axios.patch(
-      `http://localhost:3000/api/lessons/${lessonId}`,
-      { title: newTitle },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    console.log("Response:", response.data); // Лог для перевірки відповіді
+  const handleSaveTitle = async () => {
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/lessons/${lessonId}`,
+        { title: newTitle },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setLesson((prev) => ({ ...prev, title: newTitle }));
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error("Error saving title:", error);
+      alert("Не вдалося зберегти нову назву.");
+    }
+  };
 
-    setLesson((prevLesson) => ({
-      ...prevLesson,
-      title: newTitle,
-    }));
+  const cleanContent = (html) => {
+    return html
+      .replace(/<p><br><\/p>/g, "") // Видаляємо порожні абзаци
+      .replace(/<p>(.*?)<\/p>/g, "$1<br>") // Заміна <p> на <br> для кращої сумісності
+      .replace(/(<br>\s*)+$/g, ""); // Видаляємо зайві <br> в кінці
+  };
 
-    setIsEditingTitle(false); // Вихід з режиму редагування
-  } catch (error) {
-    console.error("Error saving lesson title:", error);
-    alert("Не вдалося зберегти нову назву.");
-  }
-};
+  const handleSaveContent = async () => {
+    const cleanedContent = cleanContent(content); // Очищений контент
 
-const handleSaveContent = async () => {
-  console.log("Saving lesson content..."); // Лог для перевірки
-  try {
-    const response = await axios.patch(
-      `http://localhost:3000/api/lessons/${lessonId}`,
-      { content: lesson.content },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    console.log("Response:", response.data); // Лог для перевірки відповіді
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/lessons/${lessonId}`,
+        { content: cleanedContent },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving content:", error);
+      alert("Не вдалося зберегти зміни контенту.");
+    }
+  };
 
-    setIsEditing(false); // Вихід з режиму редагування
-  } catch (error) {
-    console.error("Error saving lesson content:", error);
-    alert("Не вдалося зберегти зміни контенту.");
-  }
-};
-
-
-  // Функція для скасування редагування назви
   const handleCancelEdit = () => {
-    setNewTitle(lesson.title); // Відновлюємо початкову назву
-    setIsEditingTitle(false); // Виходимо з режиму редагування
+    setNewTitle(lesson.title);
+    setIsEditingTitle(false);
   };
 
-  // Функція для перемикання режиму редагування
-  const toggleEditTitle = () => {
-    setIsEditingTitle(!isEditingTitle);
+  const toggleEditTitle = () => setIsEditingTitle(!isEditingTitle);
+
+  const modules = {
+    toolbar: {
+      container: "#toolbar", // Вказуємо ідентифікатор для кастомної панелі
+    },
+    clipboard: {
+      matchVisual: false, // Запобігає зайвим <p> і <br> при вставці
+    },
   };
+
+  const renderToolbar = () => (
+    <div id="toolbar">
+      <Tooltip title="Заголовок 1" arrow>
+        <button className="ql-header" value="1" />
+      </Tooltip>
+      <Tooltip title="Заголовок 2" arrow>
+        <button className="ql-header" value="2" />
+      </Tooltip>
+      <Tooltip title="Жирний" arrow>
+        <button className="ql-bold" />
+      </Tooltip>
+      <Tooltip title="Курсив" arrow>
+        <button className="ql-italic" />
+      </Tooltip>
+      <Tooltip title="Підкреслений" arrow>
+        <button className="ql-underline" />
+      </Tooltip>
+      <Tooltip title="Закреслений" arrow>
+        <button className="ql-strike" />
+      </Tooltip>
+      <Tooltip title="Цитата" arrow>
+        <button className="ql-blockquote" />
+      </Tooltip>
+      <Tooltip title="Код-блок" arrow>
+        <button className="ql-code-block" />
+      </Tooltip>
+      <Tooltip title="Маркерований список" arrow>
+        <button className="ql-list" value="bullet" />
+      </Tooltip>
+      <Tooltip title="Нумерований список" arrow>
+        <button className="ql-list" value="ordered" />
+      </Tooltip>
+      <Tooltip title="Вставити посилання" arrow>
+        <button className="ql-link" />
+      </Tooltip>
+      <Tooltip title="Вирівнювання тексту" arrow>
+        <select className="ql-align">
+          <option defaultValue></option>
+          <option value="center" />
+          <option value="right" />
+          <option value="justify" />
+        </select>
+      </Tooltip>
+      <Tooltip title="Вибрати колір тексту" arrow>
+        <select className="ql-color" />
+      </Tooltip>
+      <Tooltip title="Вибрати колір фону" arrow>
+        <select className="ql-background" />
+      </Tooltip>
+      <Tooltip title="Очистити форматування" arrow>
+        <button className="ql-clean" />
+      </Tooltip>
+      <Tooltip title="Вставити зображення" arrow>
+        <button
+          className="ql-image"
+          onClick={() => handleFileUpload("image")}
+        />
+      </Tooltip>
+      <Tooltip title="Вставити відео" arrow>
+        <button
+          className="ql-video"
+          onClick={() => handleFileUpload("video")}
+        />
+      </Tooltip>
+    </div>
+  );
+
+const handleFileUpload = (type) => {
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+
+  // Дозволяємо тільки певні типи файлів
+  if (type === "image") {
+    input.setAttribute("accept", "image/*");
+  } else if (type === "video") {
+    input.setAttribute("accept", "video/*");
+  }
+
+  input.click();
+
+  input.onchange = async () => {
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      // Замінити шлях на правильний API для завантаження файлів
+      const res = await axios.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const range = quillRef.current.getEditor().getSelection();
+      const url = res.data.url;
+
+      if (type === "image") {
+        quillRef.current.getEditor().insertEmbed(range.index, "image", url);
+      } else if (type === "video") {
+        quillRef.current.getEditor().insertEmbed(range.index, "video", url);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Не вдалося завантажити файл.");
+    }
+  };
+};
 
   if (!lesson) return <Typography>Завантаження...</Typography>;
 
@@ -125,7 +233,7 @@ const handleSaveContent = async () => {
       <Box sx={{ width: "240px", borderRight: "1px solid #ccc", padding: 2 }}>
         <Typography variant="h6">Уроки</Typography>
         <List>
-          {cachedLessons && cachedLessons.length > 0 ? (
+          {cachedLessons.length ? (
             cachedLessons.map((lesson) => (
               <ListItem key={lesson._id}>
                 <ListItemButton
@@ -145,16 +253,10 @@ const handleSaveContent = async () => {
         </List>
       </Box>
 
-      {/* Основна частина сторінки уроку */}
-      <Box sx={{ flexGrow: 1, padding: 3 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          {/* Назва уроку з можливістю редагування */}
+      {/* Основний контент уроку */}
+      <Box sx={{ flexGrow: 1, padding: 3, overflow: "auto" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          {/* Заголовок уроку з можливістю редагування */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {isEditingTitle ? (
               <TextField
@@ -165,11 +267,10 @@ const handleSaveContent = async () => {
                 sx={{ flexGrow: 1 }}
               />
             ) : (
-              <Typography variant="h4" sx={{ flexGrow: 1 }}>
-                {lesson.title}
-              </Typography>
+              <Typography variant="h4">{lesson.title}</Typography>
             )}
 
+            {/* Кнопки для збереження та скасування редагування заголовка */}
             {isEditingTitle ? (
               <>
                 <IconButton onClick={handleSaveTitle} color="primary">
@@ -186,7 +287,7 @@ const handleSaveContent = async () => {
             )}
           </Box>
 
-          {/* Кнопка для збереження контенту */}
+          {/* Кнопка збереження контенту */}
           {isEditing && (
             <Button variant="contained" onClick={handleSaveContent}>
               Зберегти
@@ -196,25 +297,25 @@ const handleSaveContent = async () => {
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Контент уроку */}
+        {/* Вміст уроку з підтримкою редагування */}
         {isEditing ? (
-          <TextField
-            name="content"
-            value={lesson.content}
-            onChange={(e) =>
-              setLesson((prevLesson) => ({
-                ...prevLesson,
-                content: e.target.value,
-              }))
-            }
-            multiline
-            rows={10}
-            fullWidth
-          />
+          <>
+            {/* Панель інструментів для редактора */}
+            {renderToolbar()}
+            <ReactQuill
+              ref={quillRef}
+              value={content}
+              onChange={setContent}
+              modules={modules} // Додаємо конфігурацію
+              theme="snow"
+              style={{ height: "400px", marginBottom: "20px" }}
+            />
+          </>
         ) : (
-          <Typography variant="body1">{lesson.content}</Typography>
+          <div dangerouslySetInnerHTML={{ __html: content }} />
         )}
 
+        {/* Кнопка для перемикання між режимами редагування */}
         <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
           {isEditing ? "Скасувати" : "Редагувати"}
         </Button>

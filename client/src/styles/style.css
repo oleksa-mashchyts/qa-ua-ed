@@ -116,3 +116,16 @@ input {
 .MuiCard-root:hover {
   transform: scale(1.05);
 }
+
+#toolbar {
+  display: flex;
+  gap: 10px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+#toolbar button, #toolbar select {
+  cursor: pointer;
+}
