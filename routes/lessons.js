@@ -140,9 +140,11 @@ async function getLesson(req, res, next) {
 // Оновити урок
 router.patch("/:id", async (req, res) => {
   try {
+    const { title, content } = req.body; // Отримуємо нові дані з тіла запиту
+
     const updatedLesson = await Lesson.findByIdAndUpdate(
       req.params.id,
-      { title: req.body.title },
+      { title, content }, // Оновлюємо і назву, і контент
       { new: true }
     );
 
@@ -155,6 +157,7 @@ router.patch("/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 
 // Отримати уроки для певного курсу

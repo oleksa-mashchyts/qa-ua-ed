@@ -12,38 +12,51 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setCurrentUser(storedUser);
-      fetchUserTheme(storedUser._id);
+    try {
+      const storedUser = localStorage.getItem("user");
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+      console.log("Parsed user from localStorage:", parsedUser); // Діагностика
+
+      if (parsedUser) {
+        setCurrentUser(parsedUser);
+        fetchUserTheme(parsedUser._id);
+      }
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
+      localStorage.removeItem("user"); // Видаляємо некоректні дані
     }
     setIsLoading(false);
   }, []);
 
   const fetchUserTheme = async (userId) => {
     try {
-          if (!userId) {
-            console.error("User ID is undefined.");
-            return;
-          }
+      if (!userId) {
+        console.error("User ID is undefined.");
+        return;
+      }
       const response = await axios.get(
         `http://localhost:3000/api/users/${userId}`
       );
-      const userTheme = response.data.theme || "light";
-      setTheme(userTheme);
-      localStorage.setItem("theme", userTheme); // Зберігаємо тему у localStorage
+
+      if (response.data) {
+        const userTheme = response.data.theme || "light";
+        setTheme(userTheme);
+        localStorage.setItem("theme", userTheme); // Зберігаємо тему у localStorage
+      } else {
+        console.error("No theme data received.");
+      }
     } catch (error) {
       console.error("Error fetching user theme:", error);
     }
   };
-
 
   const updateUserTheme = async (newTheme) => {
     try {
       if (currentUser && currentUser._id) {
         await axios.patch(
           `http://localhost:3000/api/users/${currentUser._id}/theme`,
-          { theme: newTheme }
+          { theme: newTheme },
+          { headers: { "Content-Type": "application/json" } } // Заголовок для PATCH
         );
       }
       setTheme(newTheme);
@@ -53,26 +66,26 @@ export function AuthProvider({ children }) {
     }
   };
 
-const login = async (credentials) => {
-  try {
-    const user = await loginUser(credentials); // Пряме отримання користувача
-    console.log("User logged in:", user); // Лог для перевірки
+  const login = async (credentials) => {
+    try {
+      const user = await loginUser(credentials); // Пряме отримання користувача
+      console.log("User logged in:", user); // Лог для перевірки
 
-   if (!user || !user._id) {
-     console.error("User ID is missing.");
-     throw new Error("User ID is missing.");
-   }
+      if (!user || !user._id) {
+        console.error("User ID is missing.");
+        throw new Error("User ID is missing.");
+      }
 
-    setCurrentUser(user);
-    localStorage.setItem("user", JSON.stringify(user));
-    fetchUserTheme(user._id); // Отримуємо тему після входу
-    navigate("/dashboard");
-    return user;
-  } catch (error) {
-    console.error("Login error:", error.response?.data || error.message);
-    throw error;
-  }
-};
+      setCurrentUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
+      fetchUserTheme(user._id); // Отримуємо тему після входу
+      navigate("/dashboard");
+      return user;
+    } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
+      throw error;
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("user");
