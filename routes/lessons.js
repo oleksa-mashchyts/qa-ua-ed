@@ -138,33 +138,24 @@ async function getLesson(req, res, next) {
 }
 
 // Оновити урок
-router.patch('/:id', getLesson, async (req, res) => {
-    const { title, content, courseId } = req.body;
+router.patch("/:id", async (req, res) => {
+  try {
+    const updatedLesson = await Lesson.findByIdAndUpdate(
+      req.params.id,
+      { title: req.body.title },
+      { new: true }
+    );
 
-    // Валідація даних для оновлення уроку
-    const { error } = lessonValidation(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
-
-    // Оновлення полів, якщо вони присутні в запиті
-    if (title != null) {
-        res.lesson.title = title;
-    }
-    if (content != null) {
-        res.lesson.content = content;
-    }
-    if (courseId != null) {
-        res.lesson.courseId = courseId;
+    if (!updatedLesson) {
+      return res.status(404).json({ message: "Lesson not found" });
     }
 
-    try {
-        const updatedLesson = await res.lesson.save();
-        res.json(updatedLesson);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+    res.json(updatedLesson);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
+
 
 // Отримати уроки для певного курсу
 router.get('/courses/:id/lessons', async (req, res) => {
