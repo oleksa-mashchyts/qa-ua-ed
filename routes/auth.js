@@ -158,7 +158,10 @@ router.post('/login', async (req, res) => {
 };
 
 res.cookie('token', token, cookieOptions); // Відправляємо токен у cookie
-res.json({ message: 'Login successful', user: { name: user.name, email: user.email, role: user.role } });
+res.json({
+  message: "Login successful",
+  user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+});
 
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

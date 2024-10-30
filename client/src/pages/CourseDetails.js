@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Box, Typography, TextField, Table, TableBody, 
-  TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, List, ListItem 
+  TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox
 } from '@mui/material';
 import { format } from 'date-fns';
 import CustomButton from '../components/CustomButton';
 
 const CourseDetails = () => {
+  const navigate = useNavigate(); 
   const { courseId } = useParams(); // Отримуємо ID курсу з URL
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -53,6 +54,10 @@ const CourseDetails = () => {
       console.error('Error adding lesson:', error);
     }
   };
+  
+  const handleEnterLesson = (lessonId) => {
+    navigate(`/dashboard/courses/${courseId}/lessons/${lessonId}`);
+  };
 
   if (!course) return <Typography>Завантаження...</Typography>;
 
@@ -92,29 +97,23 @@ const CourseDetails = () => {
           <TableBody>
             {lessons.map((lesson) => (
               <TableRow key={lesson._id}>
-                <TableCell padding="checkbox">
-                  <Checkbox />
-                </TableCell>
-                <TableCell align="left">{lesson.title}</TableCell>
-                <TableCell align="left">
-                  {lesson.completed ? 'Завершений' : 'В процесі'}
-                </TableCell>
-                <TableCell align="left">
-                  {format(new Date(lesson.createdAt), 'dd/MM/yyyy')}
-                </TableCell>
-              </TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox />
+              </TableCell>
+              <TableCell 
+                align="left" 
+                onClick={() => handleEnterLesson(lesson._id)}
+                sx={{ cursor: 'pointer', textDecoration: 'underline' }} // Додаємо стиль для курсору
+      >
+        {lesson.title}
+      </TableCell>
+              <TableCell align="left">{lesson.completed ? 'Завершений' : 'В процесі'}</TableCell>
+              <TableCell align="left">{format(new Date(lesson.createdAt), 'dd/MM/yyyy')}</TableCell>
+            </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Старий список уроків (залишено для сумісності) */}
-      <List sx={{ mt: 3 }}>
-        {lessons.map((lesson) => (
-          <ListItem key={lesson._id}>{lesson.title}</ListItem>
-        ))}
-      </List>
-
 
     </Box>
   );

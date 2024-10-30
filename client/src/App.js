@@ -11,31 +11,36 @@ import Teachers from './pages/Teachers';
 import Courses from './pages/Courses';
 import CourseDetails from './pages/CourseDetails';
 import { useAuth } from './context/AuthContext';
+import LessonView from './pages/LessonView';
 
 const App = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const { currentUser, isLoading } = useAuth();
+  const { currentUser, isLoading, theme, updateUserTheme } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
-  const theme = isDarkMode ? darkTheme : lightTheme;
-
-  // Виконуємо редирект на дашборд, якщо користувач авторизований і знаходиться на кореневому маршруті
   useEffect(() => {
-    if (!isLoading && currentUser && location.pathname === '/') {
-      navigate('/dashboard'); // Редирект на дашборд
+    console.log("Current User:", currentUser); // Лог для перевірки користувача
+    if (!isLoading && currentUser && location.pathname === "/") {
+      navigate("/dashboard");
     }
   }, [isLoading, currentUser, location.pathname, navigate]);
 
+  const handleToggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    updateUserTheme(newTheme); // Оновлюємо тему користувача
+  };
+
+  const appliedTheme = theme === "dark" ? darkTheme : lightTheme;
+
+
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={appliedTheme}>
       <CssBaseline />
-      <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-      <Box sx={{ height: '100vh' }}>
+      <Header toggleTheme={handleToggleTheme} isDarkMode={theme === "dark"} />
+      <Box sx={{ height: "100vh" }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          
+
           <Route
             path="/dashboard/*"
             element={
@@ -45,17 +50,26 @@ const App = () => {
             }
           >
             <Route index element={<Navigate to="home" />} />
-            <Route path="home" element={<Typography variant="h5">Головна</Typography>} />
+            <Route
+              path="home"
+              element={<Typography variant="h5">Головна</Typography>}
+            />
             <Route path="courses" element={<Courses />} />
             <Route path="students" element={<Students />} />
             <Route path="teachers" element={<Teachers />} />
-          
+            <Route
+              path="courses/:courseId/lessons/:lessonId"
+              element={<LessonView />}
+            />
 
-          {/* Новий маршрут для сторінки деталей курсу */}
-          <Route path="courses/:courseId" element={<CourseDetails />} />
+            {/* Новий маршрут для сторінки деталей курсу */}
+            <Route path="courses/:courseId" element={<CourseDetails />} />
           </Route>
           {/* Редирект на дашборд або головну залежно від авторизації */}
-          <Route path="*" element={<Navigate to={currentUser ? "/dashboard" : "/"} />} />
+          <Route
+            path="*"
+            element={<Navigate to={currentUser ? "/dashboard" : "/"} />}
+          />
         </Routes>
       </Box>
     </ThemeProvider>

@@ -21,13 +21,22 @@ router.post('/register', async (req, res) => {
 });
 
 // Вхід користувача
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
+    localStorage.removeItem("user");
+  try {
     const user = await User.findOne({ email: req.body.email });
-    if (user && await bcrypt.compare(req.body.password, user.password)) {
-        res.json({ message: 'Login successful', user });
+    if (user && (await bcrypt.compare(req.body.password, user.password))) {
+      const { _id, name, email, role } = user; // Передаємо необхідні поля, включаючи _id
+      res.json({
+        message: "Login successful",
+        user: { _id, name, email, role },
+      });
     } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+      res.status(401).json({ message: "Invalid credentials" });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // Отримати всіх студентів
@@ -53,6 +62,20 @@ router.get('/teachers', async (req, res) => {
 // Отримати профіль користувача
 router.get('/:id', getUser, (req, res) => {
     res.json(res.user);
+});
+
+// Оновлення теми користувача
+router.patch('/:id/theme', async (req, res) => {
+  try {
+    const { theme } = req.body;
+    const user = await User.findByIdAndUpdate(req.params.id, { theme }, { new: true });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // Middleware для отримання користувача по ID

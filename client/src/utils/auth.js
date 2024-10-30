@@ -1,4 +1,3 @@
-// auth.js
 import axios from 'axios';
 
 export const loginUser = async (credentials) => {
