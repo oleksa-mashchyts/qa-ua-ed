@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, Typography, CardActions, Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,7 +36,9 @@ const CourseList = ({ courses, onDelete, onEdit, onEnter }) => {
           <IconButton color="default" onClick={() => onEnter(course._id)}>
               <ArrowForwardIcon />
             </IconButton>
-          <IconButton color="primary" onClick={() => onEdit(course)}>
+          <IconButton color="primary" onClick={() => onEdit(course)}
+            
+            >
               <EditIcon />
             </IconButton>
             <IconButton color="error" onClick={() => onDelete(course._id)}>

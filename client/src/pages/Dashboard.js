@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   CssBaseline,
   Divider,
-  AppBar,
   Toolbar,
   IconButton,
 } from "@mui/material";
@@ -91,7 +90,7 @@ return (
           px: 1,
         }}
       >
-        <Typography variant="h6" noWrap sx={{ marginLeft: 2 }}>
+        <Typography variant="h6" noWrap sx={{ marginLeft: 1 }}>
           {isDrawerOpen &&
             `Панель ${currentUser?.role === "admin" ? "Адміна" : "Вчителя"}`}
         </Typography>

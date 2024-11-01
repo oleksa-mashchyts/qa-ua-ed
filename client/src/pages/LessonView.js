@@ -26,6 +26,7 @@ const LessonView = () => {
 
   const [cachedLessons, setCachedLessons] = useState([]);
   const [lesson, setLesson] = useState(null);
+  const [courseTitle, setCourseTitle] = useState(""); // Додаємо стан для назви курсу
   const [newTitle, setNewTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -44,9 +45,22 @@ const LessonView = () => {
     }
   }, [lessonId]);
 
+  // Завантажуємо назву курсу
+  const fetchCourseTitle = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/courses/${courseId}`
+      );
+      setCourseTitle(response.data.title); // Зберігаємо назву курсу
+    } catch (error) {
+      console.error("Error fetching course title:", error);
+    }
+  }, [courseId]);
+
   useEffect(() => {
     fetchLesson();
-  }, [fetchLesson]);
+    fetchCourseTitle(); // Викликаємо завантаження назви курсу
+  }, [fetchLesson, fetchCourseTitle]);
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -184,47 +198,47 @@ const LessonView = () => {
     </div>
   );
 
-const handleFileUpload = (type) => {
-  console.log("Функція handleFileUpload викликана з типом:", type); // Лог для перевірки
-  const input = document.createElement("input");
-  input.setAttribute("type", "file");
+  const handleFileUpload = (type) => {
+    console.log("Функція handleFileUpload викликана з типом:", type); // Лог для перевірки
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
 
-  // Дозволяємо тільки певні типи файлів
-  if (type === "image") {
-    input.setAttribute("accept", "image/*");
-  } else if (type === "video") {
-    input.setAttribute("accept", "video/*");
-  }
-
-  input.click();
-
-  input.onchange = async () => {
-    const file = input.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await axios.post("/api/uploads", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const url = res.data.url; // Отримуємо URL завантаженого файлу
-      const range = quillRef.current.getEditor().getSelection();
-
-      if (type === "image") {
-        console.log("Отриманий URL від сервера:", url); // Додатковий лог для перевірки
-        quillRef.current.getEditor().insertEmbed(range.index, "image", url);
-      } else if (type === "video") {
-        quillRef.current.getEditor().insertEmbed(range.index, "video", url);
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      alert("Не вдалося завантажити файл.");
+    // Дозволяємо тільки певні типи файлів
+    if (type === "image") {
+      input.setAttribute("accept", "image/*");
+    } else if (type === "video") {
+      input.setAttribute("accept", "video/*");
     }
+
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await axios.post("/api/uploads", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        const url = res.data.url; // Отримуємо URL завантаженого файлу
+        const range = quillRef.current.getEditor().getSelection();
+
+        if (type === "image") {
+          console.log("Отриманий URL від сервера:", url); // Додатковий лог для перевірки
+          quillRef.current.getEditor().insertEmbed(range.index, "image", url);
+        } else if (type === "video") {
+          quillRef.current.getEditor().insertEmbed(range.index, "video", url);
+        }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        alert("Не вдалося завантажити файл.");
+      }
+    };
   };
-};
 
   if (!lesson) return <Typography>Завантаження...</Typography>;
 
@@ -276,6 +290,10 @@ const handleFileUpload = (type) => {
           height: "100vh",
         }}
       >
+        {/* Відображаємо назву курсу */}
+        <Typography variant="h5" gutterBottom>
+          » {courseTitle}
+        </Typography>{" "}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Заголовок уроку з можливістю редагування */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -286,6 +304,11 @@ const handleFileUpload = (type) => {
                 variant="outlined"
                 size="small"
                 sx={{ flexGrow: 1 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSaveTitle();
+                  }
+                }}
               />
             ) : (
               <Typography variant="h4">{lesson.title}</Typography>
@@ -315,9 +338,7 @@ const handleFileUpload = (type) => {
             </Button>
           )}
         </Box>
-
         <Divider sx={{ my: 2 }} />
-
         {/* Вміст уроку з підтримкою редагування */}
         {isEditing ? (
           <>
@@ -335,7 +356,6 @@ const handleFileUpload = (type) => {
         ) : (
           <div dangerouslySetInnerHTML={{ __html: content }} />
         )}
-
         {/* Кнопка для перемикання між режимами редагування */}
         <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
           {isEditing ? "Скасувати" : "Редагувати"}

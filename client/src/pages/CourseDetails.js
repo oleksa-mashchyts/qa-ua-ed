@@ -63,7 +63,9 @@ const CourseDetails = () => {
 
   return (
     <Box sx={{ padding: 2 }}>
-      <Typography variant="h4" gutterBottom>{course.title}</Typography>
+      <Typography variant="h4" gutterBottom>
+        {course.title}
+      </Typography>
 
       <TextField
         label="Назва уроку"
@@ -71,15 +73,19 @@ const CourseDetails = () => {
         onChange={(e) => setNewLesson(e.target.value)}
         fullWidth
         sx={{ mt: 2 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleAddLesson();
+          }
+        }}
       />
-      <CustomButton
-        sx={{ mt: 2 }}
-        onClick={handleAddLesson}
-      >
+      <CustomButton sx={{ mt: 2 }} onClick={handleAddLesson}>
         Додати урок
       </CustomButton>
 
-      <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>Уроки</Typography>
+      <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>
+        Уроки
+      </Typography>
 
       {/* Таблиця уроків */}
       <TableContainer component={Paper} sx={{ mt: 3 }}>
@@ -97,24 +103,27 @@ const CourseDetails = () => {
           <TableBody>
             {lessons.map((lesson) => (
               <TableRow key={lesson._id}>
-              <TableCell padding="checkbox">
-                <Checkbox />
-              </TableCell>
-              <TableCell 
-                align="left" 
-                onClick={() => handleEnterLesson(lesson._id)}
-                sx={{ cursor: 'pointer', textDecoration: 'underline' }} // Додаємо стиль для курсору
-      >
-        {lesson.title}
-      </TableCell>
-              <TableCell align="left">{lesson.completed ? 'Завершений' : 'В процесі'}</TableCell>
-              <TableCell align="left">{format(new Date(lesson.createdAt), 'dd/MM/yyyy')}</TableCell>
-            </TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox />
+                </TableCell>
+                <TableCell
+                  align="left"
+                  onClick={() => handleEnterLesson(lesson._id)}
+                  sx={{ cursor: "pointer", textDecoration: "underline" }} // Додаємо стиль для курсору
+                >
+                  {lesson.title}
+                </TableCell>
+                <TableCell align="left">
+                  {lesson.completed ? "Завершений" : "В процесі"}
+                </TableCell>
+                <TableCell align="left">
+                  {format(new Date(lesson.createdAt), "dd/MM/yyyy")}
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-
     </Box>
   );
 };

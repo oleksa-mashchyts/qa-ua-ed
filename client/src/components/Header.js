@@ -40,7 +40,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-              Освітній портал
+              UADx
             </Link>
           </Typography>
           {currentUser ? (
