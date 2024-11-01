@@ -1,155 +1,98 @@
 const express = require('express');
 const Lesson = require('../models/Lesson');
-const Course = require('../models/Course');
-const { lessonValidation } = require('../validators/lessonValidator'); // Імпорт валідації
 const router = express.Router();
 const mongoose = require('mongoose');
 
-
-// Отримати всі уроки
-/**
- * @swagger
- * /api/lessons:
- *   get:
- *     summary: Get all lessons
- *     tags: [Lessons]
- *     responses:
- *       200:
- *         description: List of all lessons
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Lesson'
- */
-router.get('/', async (req, res) => {
-    try {
-        const lessons = await Lesson.find();
-        res.json(lessons);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+// Отримати всі уроки для певного курсу в порядку order
+router.get('/courses/:id/lessons', async (req, res) => {
+  try {
+    const lessons = await Lesson.find({ courseId: req.params.id }).sort('order');
+    res.json(lessons);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-// Створити новий урок
-/**
- * @swagger
- * /api/lessons:
- *   post:
- *     summary: Create a new lesson
- *     tags: [Lessons]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Lesson'
- *     responses:
- *       201:
- *         description: The lesson was successfully created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Lesson'
- */
+
+// Створити новий урок із встановленням порядку
 router.post('/', async (req, res) => {
-    console.log('Запит на створення уроку:', req.body); // Логування
+  const { title, content, courseId } = req.body;
 
-    const { title, content, courseId } = req.body;
+  if (!courseId) {
+    return res.status(400).json({ message: 'courseId is required' });
+  }
 
-    if (!courseId) {
-        console.log('Помилка: Відсутній courseId');
-        return res.status(400).json({ message: 'courseId is required' });
-    }
+  try {
+    // Визначаємо останній порядок для цього курсу
+    const lastLesson = await Lesson.findOne({ courseId }).sort('-order');
+    const order = lastLesson ? lastLesson.order + 1 : 1;
 
-    if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        console.log('Невалідний courseId:', courseId);
-        return res.status(400).json({ message: 'Invalid courseId format' });
-    }
-
-    try {
-        const newLesson = new Lesson({ title, content, courseId });
-        await newLesson.save();
-        console.log('Новий урок успішно створено:', newLesson);
-        res.status(201).json(newLesson);
-    } catch (error) {
-        console.error('Помилка при створенні уроку:', error);
-        res.status(500).json({ message: 'Не вдалося створити урок' });
-    }
+    const newLesson = new Lesson({ title, content, courseId, order });
+    await newLesson.save();
+    res.status(201).json(newLesson);
+  } catch (error) {
+    res.status(500).json({ message: 'Не вдалося створити урок' });
+  }
 });
-
-module.exports = router;
   
   
-
+// Оновити порядок уроків
+router.patch('/:id/order', async (req, res) => {
+  const { order } = req.body;
+  try {
+    const updatedLesson = await Lesson.findByIdAndUpdate(req.params.id, { order }, { new: true });
+    if (!updatedLesson) {
+      return res.status(404).json({ message: 'Lesson not found' });
+    }
+    res.json(updatedLesson);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Отримати урок за ID
-/**
- * @swagger
- * /api/lessons/{id}:
- *   get:
- *     summary: Get lesson by ID
- *     tags: [Lessons]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The lesson ID
- *     responses:
- *       200:
- *         description: The lesson by ID
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Lesson'
- *       404:
- *         description: Lesson not found
- */
 router.get('/:id', getLesson, (req, res) => {
-    res.json(res.lesson);
+  res.json(res.lesson);
 });
 
 // Видалити урок
 router.delete('/:id', getLesson, async (req, res) => {
-    try {
-        await Lesson.findByIdAndDelete(req.params.id); // Використовуємо findByIdAndDelete
-        res.json({ message: 'Lesson deleted' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    await Lesson.findByIdAndDelete(req.params.id); // Використовуємо findByIdAndDelete
+    res.json({ message: 'Lesson deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Middleware для отримання урока по ID
 async function getLesson(req, res, next) {
-    let lesson;
-    try {
-        lesson = await Lesson.findById(req.params.id);
-        if (lesson == null) {
-            return res.status(404).json({ message: 'Lesson not found' });
-        }
-    } catch (err) {
-        return res.status(500).json({ message: err.message });
+  let lesson;
+  try {
+    lesson = await Lesson.findById(req.params.id).populate('courseId'); // Включаємо дані про курс
+    if (lesson == null) {
+      return res.status(404).json({ message: 'Lesson not found' });
     }
-    res.lesson = lesson;
-    next();
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+  res.lesson = lesson;
+  next();
 }
 
 // Оновити урок
-router.patch("/:id", async (req, res) => {
+router.patch('/:id', async (req, res) => {
   try {
-    const { title, content } = req.body; // Отримуємо нові дані з тіла запиту
+    const { title, content, order } = req.body; // Отримуємо нові дані з тіла запиту, включаючи порядок
 
     const updatedLesson = await Lesson.findByIdAndUpdate(
       req.params.id,
-      { title, content }, // Оновлюємо і назву, і контент
+      { title, content, order }, // Оновлюємо і назву, і контент, і порядок
       { new: true }
     );
 
     if (!updatedLesson) {
-      return res.status(404).json({ message: "Lesson not found" });
+      return res.status(404).json({ message: 'Lesson not found' });
     }
 
     res.json(updatedLesson);
@@ -158,16 +101,14 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-
-
-// Отримати уроки для певного курсу
+// Отримати уроки для певного курсу з урахуванням порядку
 router.get('/courses/:id/lessons', async (req, res) => {
-    try {
-        const lessons = await Lesson.find({ courseId: req.params.id });
-        res.json(lessons);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const lessons = await Lesson.find({ courseId: req.params.id }).sort('order'); // Сортуємо за order
+    res.json(lessons);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 

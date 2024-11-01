@@ -11,9 +11,12 @@ const TestSchema = new Schema({
     default: [],
   },
   courseId: {
-    // Додаємо поле для зв'язку з курсом
     type: Schema.Types.ObjectId,
     ref: "Course",
+    required: true,
+  },
+  order: {
+    type: Number,
     required: true,
   },
   createdAt: {
