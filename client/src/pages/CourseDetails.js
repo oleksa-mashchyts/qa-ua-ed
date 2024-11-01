@@ -124,6 +124,11 @@ const CourseDetails = () => {
         onChange={(e) => setNewLesson(e.target.value)}
         fullWidth
         sx={{ mt: 2 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleAddLesson();
+          }
+        }}
       />
       <CustomButton sx={{ mt: 2 }} onClick={handleAddLesson}>
         Додати урок
@@ -135,6 +140,11 @@ const CourseDetails = () => {
         onChange={(e) => setNewTest(e.target.value)}
         fullWidth
         sx={{ mt: 2 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleAddTest();
+          }
+        }}
       />
       <CustomButton sx={{ mt: 2 }} onClick={handleAddTest}>
         Додати тест
