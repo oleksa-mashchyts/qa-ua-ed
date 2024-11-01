@@ -134,37 +134,45 @@ router.post('/register', async (req, res) => {
 
 // Маршрут для входу
 router.post('/login', async (req, res) => {
+  console.log("Запит на авторизацію: /api/auth/login"); // Лог для перевірки
   console.log(req.body); // Перевірка даних, що надходять
   const { email, password } = req.body; // Використовуємо email замість username
 
   try {
     // Знаходимо користувача за email
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     // Перевіряємо пароль
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Створюємо JWT-токен
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
- // Використовуємо HTTP-only cookies для зберігання токена
- const cookieOptions = {
-  httpOnly: true, // Робить cookie недоступними через JavaScript
-  secure: process.env.NODE_ENV === 'production', // Вимагати HTTPS у продакшн-режимі
-  sameSite: 'strict', // Захист від CSRF-атак
-  maxAge: 3600000, // Термін дії cookie - 1 година
-};
+    // Використовуємо HTTP-only cookies для зберігання токена
+    const cookieOptions = {
+      httpOnly: true, // Робить cookie недоступними через JavaScript
+      secure: process.env.NODE_ENV === "production", // Вимагати HTTPS у продакшн-режимі
+      sameSite: "strict", // Захист від CSRF-атак
+      maxAge: 3600000, // Термін дії cookie - 1 година
+    };
 
-res.cookie('token', token, cookieOptions); // Відправляємо токен у cookie
-res.json({
-  message: "Login successful",
-  user: { _id: user._id, name: user.name, email: user.email, role: user.role },
-});
-
+    res.cookie("token", token, cookieOptions); // Відправляємо токен у cookie
+    res.json({
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 

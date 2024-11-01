@@ -1,27 +1,29 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Modal, 
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Modal,
   Box,
-  Switch 
-} from '@mui/material';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import IconButton from '@mui/material/IconButton';
+  Switch, 
+} from "@mui/material";
+
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import IconButton from "@mui/material/IconButton";
+
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
   borderRadius: 2,
@@ -32,26 +34,19 @@ const Header = ({ toggleTheme, isDarkMode }) => {
   const [isLoginOpen, setLoginOpen] = React.useState(false);
   const [isRegisterOpen, setRegisterOpen] = React.useState(false);
 
-
   return (
     <>
       <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-              Головна
+            <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+              Освітній портал
             </Link>
           </Typography>
-          {/*
-          <Button color="inherit" component={Link} to="/courses">
-            Курси
-          </Button>
-            */}
           {currentUser ? (
             <>
               <Typography variant="body1" sx={{ marginRight: 2 }}>
-                
-              Вітаємо, {currentUser.name || 'Користувачу'}!
+                Вітаємо, {currentUser.name || "Користувачу"}!
               </Typography>
               <Button color="inherit" onClick={logout}>
                 Вийти
@@ -67,29 +62,21 @@ const Header = ({ toggleTheme, isDarkMode }) => {
               </Button>
             </>
           )}
-
-          {/* Перемикач теми */}
           <Switch
-          checked={isDarkMode}
-          onChange={toggleTheme}
-          inputProps={{ 'aria-label': 'toggle theme' }}
-        />
-        <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              
-            </div>
+            checked={isDarkMode}
+            onChange={toggleTheme}
+            inputProps={{ "aria-label": "toggle theme" }}
+          />
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            color="inherit"
+          >
+            <AccountCircle />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Модальне вікно для входу */}
       <Modal open={isLoginOpen} onClose={() => setLoginOpen(false)}>
         <Box sx={style}>
           <Typography variant="h6" component="h2" gutterBottom>
@@ -99,15 +86,14 @@ const Header = ({ toggleTheme, isDarkMode }) => {
         </Box>
       </Modal>
 
-      {/* Модальне вікно для реєстрації */}
       <Modal open={isRegisterOpen} onClose={() => setRegisterOpen(false)}>
-  <Box sx={style}>
-    <Typography variant="h6" component="h2" gutterBottom>
-      Реєстрація
-    </Typography>
-    <RegisterForm onClose={() => setRegisterOpen(false)} />
-  </Box>
-</Modal>
+        <Box sx={style}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Реєстрація
+          </Typography>
+          <RegisterForm onClose={() => setRegisterOpen(false)} />
+        </Box>
+      </Modal>
     </>
   );
 };

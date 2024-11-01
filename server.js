@@ -5,12 +5,16 @@ const cors = require('cors');
 const helmet = require('helmet'); // Використовуємо Helmet для заголовків безпеки
 require('dotenv').config(); // Для використання змінних середовища з .env файлу
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocs = require('./src/docs/swaggerDocs'); // Імпортуємо налаштування Swagger
-
+const swaggerDocs = require('./src/docs/swaggerDocs');
 
 const app = express();
 
+// Додаємо налаштування для підтримки більших файлів
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
 app.use(helmet());
+
 // Налаштування CORS
 app.use(cors({
   origin: '*',
@@ -18,14 +22,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+
+
 app.options('*', (req, res) => {
   res.sendStatus(204); // Відповідь на preflight-запит
 });
-
-
-
-// Налаштування middleware для обробки JSON
-app.use(express.json());
 
 // Підключення до бази даних MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -50,29 +51,34 @@ const coursesRouter = require('./routes/courses');
 const lessonsRouter = require('./routes/lessons');
 const testsRouter = require('./routes/tests');
 const userRouter = require('./routes/users');
+//const uploadRouter = require('./routes/upload');
 
+
+app.use('/api/auth', authRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/lessons', lessonsRouter);
 app.use('/api/tests', testsRouter);
 app.use('/api/users', userRouter);
-app.use('/api/auth', authRouter);
+//app.use('/api/uploads', uploadRouter);
+
+
+
+// Налаштування доступу до папки "uploads" як статичної
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 
 // Налаштування маршруту для кореневого ендпоінту
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'public', 'index.html'));
   });  
 
- 
-
 // Swagger-документація
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Головний маршрут для React (якщо інші не спрацювали)
-app.get('*', (req, res, next) => {
-  console.log(`${req.method} ${req.url} - Body:`, req.body);
-  next();
-    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-  });
+//app.get("*", (req, res) => {
+//  res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+//});
 
 // Запуск сервера
 const PORT = process.env.PORT || 3000;

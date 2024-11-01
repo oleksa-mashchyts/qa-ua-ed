@@ -13,6 +13,26 @@ html, body {
   overflow-x: hidden; /* Прибираємо горизонтальний скрол */
 }
 
+/* Кастомні стилі для скролбарів для всього додатку */
+::-webkit-scrollbar {
+  width: 8px; /* Товщина скролбара */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track); /* Фон скролбара */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb); /* Колір скролбара */
+  border-radius: 10px; /* Закруглення скролбара */
+  border: 2px solid transparent; /* Відстань між треком і скролом */
+  background-clip: content-box; /* Показує лише центральний колір */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover); /* Колір скролбара при наведенні */
+}
+
 h1, h2, h3 {
   color: #333;
   font-weight: 700;

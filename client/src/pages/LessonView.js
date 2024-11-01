@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import ReactQuill from "react-quill"; // Імпортуємо редактор
-import "react-quill/dist/quill.snow.css"; // Підключаємо стилі
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css"; 
 import {
   Box,
   Typography,
@@ -185,6 +185,7 @@ const LessonView = () => {
   );
 
 const handleFileUpload = (type) => {
+  console.log("Функція handleFileUpload викликана з типом:", type); // Лог для перевірки
   const input = document.createElement("input");
   input.setAttribute("type", "file");
 
@@ -203,17 +204,17 @@ const handleFileUpload = (type) => {
     formData.append("file", file);
 
     try {
-      // Замінити шлях на правильний API для завантаження файлів
-      const res = await axios.post("/api/upload", formData, {
+      const res = await axios.post("/api/uploads", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
+      const url = res.data.url; // Отримуємо URL завантаженого файлу
       const range = quillRef.current.getEditor().getSelection();
-      const url = res.data.url;
 
       if (type === "image") {
+        console.log("Отриманий URL від сервера:", url); // Додатковий лог для перевірки
         quillRef.current.getEditor().insertEmbed(range.index, "image", url);
       } else if (type === "video") {
         quillRef.current.getEditor().insertEmbed(range.index, "video", url);
@@ -230,7 +231,19 @@ const handleFileUpload = (type) => {
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       {/* Ліва панель зі списком уроків */}
-      <Box sx={{ width: "240px", borderRight: "1px solid #ccc", padding: 2 }}>
+      <Box
+        sx={{
+          width: "240px",
+          borderRight: "1px solid #ccc",
+          padding: 2,
+          overflowY: "auto", // Незалежний скрол для лівої панелі
+          maxHeight: "100vh",
+          position: "fixed", // Фіксуємо панель
+          top: 100,
+
+          height: "100vh", // Зберігаємо повну висоту для лівої панелі
+        }}
+      >
         <Typography variant="h6">Уроки</Typography>
         <List>
           {cachedLessons.length ? (
@@ -254,7 +267,15 @@ const handleFileUpload = (type) => {
       </Box>
 
       {/* Основний контент уроку */}
-      <Box sx={{ flexGrow: 1, padding: 3, overflow: "auto" }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          padding: 3,
+          overflowY: "auto", // Незалежний скрол для правої панелі
+          marginLeft: "240px", // Відступ зліва, щоб уникнути перекриття лівою панеллю
+          height: "100vh",
+        }}
+      >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Заголовок уроку з можливістю редагування */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

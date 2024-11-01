@@ -35,39 +35,91 @@ export const CustomThemeProvider = ({ children }) => {
 
 export const lightTheme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: '#1976d2',
+      main: "#1976d2",
+    },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          "--scrollbar-track": "#FFFFFF", // Колір треку скролбара для світлої теми
+          "--scrollbar-thumb": "#b0b0b0", // Колір скролбара
+          "--scrollbar-thumb-hover": "#909090", // Колір скролбара при наведенні
+
+          /* Стилі для скролбара */
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "var(--scrollbar-track)",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "var(--scrollbar-thumb)",
+            borderRadius: "4px",
+            "&:hover": {
+              backgroundColor: "var(--scrollbar-thumb-hover)",
+            },
+          },
+        },
+      },
     },
   },
 });
 
 export const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#90caf9', // Основний колір кнопки
-      contrastText: '#fff', // Колір тексту на кнопці
+      main: "#90caf9", // Основний колір кнопки
+      contrastText: "#fff", // Колір тексту на кнопці
       fontWeight: 600,
     },
     text: {
-      primary: '#ffffff', // Основний колір тексту білим
+      primary: "#ffffff", // Основний колір тексту білим
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          "--scrollbar-track": "#121212", // Колір треку скролбара для темної теми
+          "--scrollbar-thumb": "#777", // Колір скролбара
+          "--scrollbar-thumb-hover": "#999", // Колір скролбара при наведенні
+
+          /* Стилі для скролбара */
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "var(--scrollbar-track)",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "var(--scrollbar-thumb)",
+            borderRadius: "4px",
+            "&:hover": {
+              backgroundColor: "var(--scrollbar-thumb-hover)",
+            },
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         containedPrimary: {
-          '&:hover': {
-            backgroundColor: '#64b5f6', // Колір при наведенні для темної теми
+          "&:hover": {
+            backgroundColor: "#64b5f6", // Колір при наведенні для темної теми
           },
         },
         outlined: {
-          borderColor: '#90caf9', // Колір рамки
-          color: '#90caf9', // Колір тексту
-          '&:hover': {
-            backgroundColor: 'rgba(144, 202, 249, 0.1)', // Колір фону при наведенні
-            borderColor: '#64b5f6', // Колір рамки при наведенні
+          borderColor: "#90caf9", // Колір рамки
+          color: "#90caf9", // Колір тексту
+          "&:hover": {
+            backgroundColor: "rgba(144, 202, 249, 0.1)", // Колір фону при наведенні
+            borderColor: "#64b5f6", // Колір рамки при наведенні
           },
         },
       },
