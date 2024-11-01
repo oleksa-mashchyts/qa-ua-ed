@@ -199,7 +199,6 @@ const LessonView = () => {
   );
 
   const handleFileUpload = (type) => {
-    console.log("Функція handleFileUpload викликана з типом:", type); // Лог для перевірки
     const input = document.createElement("input");
     input.setAttribute("type", "file");
 
@@ -228,8 +227,7 @@ const LessonView = () => {
         const range = quillRef.current.getEditor().getSelection();
 
         if (type === "image") {
-          console.log("Отриманий URL від сервера:", url); // Додатковий лог для перевірки
-          quillRef.current.getEditor().insertEmbed(range.index, "image", url);
+           quillRef.current.getEditor().insertEmbed(range.index, "image", url);
         } else if (type === "video") {
           quillRef.current.getEditor().insertEmbed(range.index, "video", url);
         }
@@ -242,127 +240,130 @@ const LessonView = () => {
 
   if (!lesson) return <Typography>Завантаження...</Typography>;
 
-  return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
-      {/* Ліва панель зі списком уроків */}
-      <Box
-        sx={{
-          width: "240px",
-          borderRight: "1px solid #ccc",
-          padding: 2,
-          overflowY: "auto", // Незалежний скрол для лівої панелі
-          maxHeight: "100vh",
-          position: "fixed", // Фіксуємо панель
-          top: 100,
+return (
+  <Box sx={{ display: "flex", height: "100vh" }}>
+    {/* Ліва панель зі списком уроків */}
+    <Box
+      sx={{
+        width: "240px",
+        borderRight: (theme) => `1px solid ${theme.palette.divider}`, // Застосовано стиль роздільної лінії
+        padding: 2,
+        overflowY: "auto", // Незалежний скрол для лівої панелі
+        maxHeight: "100vh",
+        position: "fixed", // Фіксуємо панель
+        top: 100,
+        height: "100vh", // Зберігаємо повну висоту для лівої панелі
+      }}
+    >
+      <Typography variant="h6">Уроки:</Typography>
+      <List>
+        {cachedLessons.length ? (
+          cachedLessons.map((lesson) => (
+            <ListItem key={lesson._id}>
+              <ListItemButton
+                onClick={() =>
+                  navigate(
+                    `/dashboard/courses/${courseId}/lessons/${lesson._id}`
+                  )
+                }
+              >
+                {lesson.title}
+              </ListItemButton>
+            </ListItem>
+          ))
+        ) : (
+          <Typography>Уроків ще немає.</Typography>
+        )}
+      </List>
+    </Box>
 
-          height: "100vh", // Зберігаємо повну висоту для лівої панелі
-        }}
-      >
-        <Typography variant="h6">Уроки</Typography>
-        <List>
-          {cachedLessons.length ? (
-            cachedLessons.map((lesson) => (
-              <ListItem key={lesson._id}>
-                <ListItemButton
-                  onClick={() =>
-                    navigate(
-                      `/dashboard/courses/${courseId}/lessons/${lesson._id}`
-                    )
-                  }
-                >
-                  {lesson.title}
-                </ListItemButton>
-              </ListItem>
-            ))
+    {/* Основний контент уроку */}
+    <Box
+      sx={{
+        flexGrow: 1,
+        padding: 3,
+        overflowY: "auto", // Незалежний скрол для правої панелі
+        marginLeft: "240px", // Відступ зліва, щоб уникнути перекриття лівою панеллю
+        height: "100vh",
+      }}
+    >
+      {/* Відображаємо назву курсу */}
+      <Typography variant="h5" gutterBottom>
+        » {courseTitle}
+      </Typography>{" "}
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        {/* Заголовок уроку з можливістю редагування */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isEditingTitle ? (
+            <TextField
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ flexGrow: 1 }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSaveTitle();
+                }
+              }}
+            />
           ) : (
-            <Typography>Уроків ще немає.</Typography>
+            <Typography variant="h4">{lesson.title}</Typography>
           )}
-        </List>
-      </Box>
 
-      {/* Основний контент уроку */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          padding: 3,
-          overflowY: "auto", // Незалежний скрол для правої панелі
-          marginLeft: "240px", // Відступ зліва, щоб уникнути перекриття лівою панеллю
-          height: "100vh",
-        }}
-      >
-        {/* Відображаємо назву курсу */}
-        <Typography variant="h5" gutterBottom>
-          » {courseTitle}
-        </Typography>{" "}
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          {/* Заголовок уроку з можливістю редагування */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {isEditingTitle ? (
-              <TextField
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                variant="outlined"
-                size="small"
-                sx={{ flexGrow: 1 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSaveTitle();
-                  }
-                }}
-              />
-            ) : (
-              <Typography variant="h4">{lesson.title}</Typography>
-            )}
-
-            {/* Кнопки для збереження та скасування редагування заголовка */}
-            {isEditingTitle ? (
-              <>
-                <IconButton onClick={handleSaveTitle} color="primary">
-                  <SaveIcon />
-                </IconButton>
-                <IconButton onClick={handleCancelEdit} color="secondary">
-                  <CancelIcon />
-                </IconButton>
-              </>
-            ) : (
-              <IconButton onClick={toggleEditTitle}>
-                <EditIcon />
+          {/* Кнопки для збереження та скасування редагування заголовка */}
+          {isEditingTitle ? (
+            <>
+              <IconButton onClick={handleSaveTitle} color="primary">
+                <SaveIcon />
               </IconButton>
-            )}
-          </Box>
-
-          {/* Кнопка збереження контенту */}
-          {isEditing && (
-            <Button variant="contained" onClick={handleSaveContent}>
-              Зберегти
-            </Button>
+              <IconButton onClick={handleCancelEdit} color="secondary">
+                <CancelIcon />
+              </IconButton>
+            </>
+          ) : (
+            <IconButton onClick={toggleEditTitle}>
+              <EditIcon />
+            </IconButton>
           )}
         </Box>
-        <Divider sx={{ my: 2 }} />
-        {/* Вміст уроку з підтримкою редагування */}
-        {isEditing ? (
-          <>
-            {/* Панель інструментів для редактора */}
-            {renderToolbar()}
-            <ReactQuill
-              ref={quillRef}
-              value={content}
-              onChange={setContent}
-              modules={modules} // Додаємо конфігурацію
-              theme="snow"
-              style={{ height: "400px", marginBottom: "20px" }}
-            />
-          </>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+
+        {/* Кнопка збереження контенту */}
+        {isEditing && (
+          <Button variant="contained" onClick={handleSaveContent}>
+            Зберегти
+          </Button>
         )}
-        {/* Кнопка для перемикання між режимами редагування */}
-        <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Скасувати" : "Редагувати"}
-        </Button>
       </Box>
+      
+      {/* Роздільна лінія з аналогічним стилем */}
+      <Divider sx={{ my: 2, borderColor: (theme) => theme.palette.divider }} />
+
+      {/* Вміст уроку з підтримкою редагування */}
+      {isEditing ? (
+        <>
+          {/* Панель інструментів для редактора */}
+          {renderToolbar()}
+          <ReactQuill
+            ref={quillRef}
+            value={content}
+            onChange={setContent}
+            modules={modules} // Додаємо конфігурацію
+            theme="snow"
+            style={{ height: "400px", marginBottom: "20px" }}
+          />
+        </>
+      ) : (
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+      )}
+      
+      {/* Кнопка для перемикання між режимами редагування */}
+      <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
+        {isEditing ? "Скасувати" : "Редагувати"}
+      </Button>
     </Box>
-  );
-};
+  </Box>
+);
+}
 
 export default LessonView;

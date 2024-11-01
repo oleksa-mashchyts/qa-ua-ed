@@ -39,6 +39,7 @@ export const lightTheme = createTheme({
     primary: {
       main: "#1976d2",
     },
+    divider: "#e0e0e0", // Колір для світлої теми
   },
   components: {
     MuiCssBaseline: {
@@ -77,6 +78,7 @@ export const darkTheme = createTheme({
       contrastText: "#fff", // Колір тексту на кнопці
       fontWeight: 600,
     },
+    divider: "#424242", // Колір для темної теми
     text: {
       primary: "#ffffff", // Основний колір тексту білим
     },
