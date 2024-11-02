@@ -14,20 +14,21 @@ import {
   Paper,
   Checkbox,
 } from "@mui/material";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { format } from "date-fns";
 import CustomButton from "../components/CustomButton";
 
-const CourseDetails = () => {
+const CourseDetails = ({
+  elements = [], // Значення за замовчуванням
+}) => {
   const navigate = useNavigate();
-  const { courseId } = useParams(); // Отримуємо ID курсу з URL
+  const { courseId } = useParams();
   const [courseTitle, setCourseTitle] = useState("");
-  const [lessons, setLessons] = useState([]);
-  const [tests, setTests] = useState([]); // Додаємо стан для тестів
+  const [newElements, setNewElements] = useState(elements);
   const [newLesson, setNewLesson] = useState("");
-  const [newTest, setNewTest] = useState(""); // Додаємо стан для нового тесту
-  const [selectedItems, setSelectedItems] = useState([]); // Стан для вибраних записів
+  const [newTest, setNewTest] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
 
-  // Завантаження курсу та його уроків і тестів
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
@@ -36,24 +37,18 @@ const CourseDetails = () => {
         );
         setCourseTitle(courseResponse.data.title);
 
-        const lessonsResponse = await axios.get(
-          `http://localhost:3000/api/lessons/courses/${courseId}/lessons`
+        const elementsResponse = await axios.get(
+          `http://localhost:3000/api/courses/${courseId}/elements`
         );
-        setLessons(lessonsResponse.data);
-
-        const testsResponse = await axios.get(
-          `http://localhost:3000/api/tests/courses/${courseId}/tests`
-        );
-        setTests(testsResponse.data);
+        setNewElements(elementsResponse.data);
       } catch (error) {
-        console.error("Error fetching course details or lessons/tests:", error);
+        console.error("Error fetching course details or elements:", error);
       }
     };
 
     fetchCourseDetails();
   }, [courseId]);
 
-  // Додавання нового уроку
   const handleAddLesson = async () => {
     try {
       const response = await axios.post(
@@ -61,20 +56,17 @@ const CourseDetails = () => {
         {
           title: newLesson,
           content: "Тут має бути контент уроку",
-          courseId, // Зв'язуємо урок із курсом
+          courseId,
         },
         { headers: { "Content-Type": "application/json" } }
       );
-
-      // Оновлюємо список уроків
-      setLessons((prevLessons) => [...prevLessons, response.data]);
-      setNewLesson(""); // Очищаємо поле вводу
+      setNewElements((prevElements) => [...prevElements, response.data]);
+      setNewLesson("");
     } catch (error) {
       console.error("Error adding lesson:", error);
     }
   };
 
-  // Додавання нового тесту
   const handleAddTest = async () => {
     try {
       const response = await axios.post(
@@ -82,12 +74,11 @@ const CourseDetails = () => {
         {
           title: newTest,
           questions: [],
-          courseId, // Зв'язуємо тест із курсом
+          courseId,
         },
         { headers: { "Content-Type": "application/json" } }
       );
-
-      setTests((prevTests) => [...prevTests, response.data]);
+      setNewElements((prevElements) => [...prevElements, response.data]);
       setNewTest("");
     } catch (error) {
       console.error("Error adding test:", error);
@@ -108,6 +99,32 @@ const CourseDetails = () => {
         ? prevSelected.filter((itemId) => itemId !== id)
         : [...prevSelected, id]
     );
+  };
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const reorderedElements = Array.from(newElements);
+    const [movedElement] = reorderedElements.splice(result.source.index, 1);
+    reorderedElements.splice(result.destination.index, 0, movedElement);
+
+    setNewElements(reorderedElements);
+
+    // Оновлюємо порядок на сервері
+    try {
+      await Promise.all(
+        reorderedElements.map((element, index) =>
+          axios.patch(
+            `http://localhost:3000/api/${element.type}s/${element._id}/order`,
+            {
+              order: index + 1,
+            }
+          )
+        )
+      );
+    } catch (error) {
+      console.error("Error updating order:", error);
+    }
   };
 
   if (!courseTitle) return <Typography>Завантаження...</Typography>;
@@ -154,84 +171,84 @@ const CourseDetails = () => {
         Уроки та Тести
       </Typography>
 
-      {/* Таблиця для уроків і тестів */}
-      <TableContainer component={Paper} sx={{ mt: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={
-                    selectedItems.length > 0 &&
-                    selectedItems.length < lessons.length + tests.length
-                  }
-                  checked={
-                    selectedItems.length === lessons.length + tests.length
-                  }
-                  onChange={(e) =>
-                    e.target.checked
-                      ? setSelectedItems([
-                          ...lessons.map((lesson) => lesson._id),
-                          ...tests.map((test) => test._id),
-                        ])
-                      : setSelectedItems([])
-                  }
-                />
-              </TableCell>
-              <TableCell align="left">Тип</TableCell>
-              <TableCell align="left">Назва</TableCell>
-              <TableCell align="left">Статус</TableCell>
-              <TableCell align="left">Дата створення</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {lessons.map((lesson) => (
-              <TableRow key={lesson._id} sx={{ cursor: "pointer" }}>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedItems.includes(lesson._id)}
-                    onChange={() => handleSelectItem(lesson._id)}
-                  />
-                </TableCell>
-                <TableCell
-                  align="left"
-                  onClick={() => handleEnterItem(lesson._id, "lesson")}
-                >
-                  Урок
-                </TableCell>
-                <TableCell align="left">{lesson.title}</TableCell>
-                <TableCell align="left">
-                  {lesson.completed ? "Завершений" : "В процесі"}
-                </TableCell>
-                <TableCell align="left">
-                  {format(new Date(lesson.createdAt), "dd/MM/yyyy")}
-                </TableCell>
-              </TableRow>
-            ))}
-            {tests.map((test) => (
-              <TableRow key={test._id} sx={{ cursor: "pointer" }}>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedItems.includes(test._id)}
-                    onChange={() => handleSelectItem(test._id)}
-                  />
-                </TableCell>
-                <TableCell
-                  align="left"
-                  onClick={() => handleEnterItem(test._id, "test")}
-                >
-                  Тест
-                </TableCell>
-                <TableCell align="left">{test.title}</TableCell>
-                <TableCell align="left">-</TableCell>
-                <TableCell align="left">
-                  {format(new Date(test.createdAt), "dd/MM/yyyy")}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="elements">
+          {(provided) => (
+            <TableContainer
+              component={Paper}
+              sx={{ mt: 3 }}
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        indeterminate={
+                          selectedItems.length > 0 &&
+                          selectedItems.length < newElements.length
+                        }
+                        checked={selectedItems.length === newElements.length}
+                        onChange={(e) =>
+                          e.target.checked
+                            ? setSelectedItems(newElements.map((el) => el._id))
+                            : setSelectedItems([])
+                        }
+                      />
+                    </TableCell>
+                    <TableCell align="left">Тип</TableCell>
+                    <TableCell align="left">Назва</TableCell>
+                    <TableCell align="left">Статус</TableCell>
+                    <TableCell align="left">Дата створення</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {newElements.map((element, index) => (
+                    <Draggable
+                      key={element._id}
+                      draggableId={element._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <TableRow
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedItems.includes(element._id)}
+                              onChange={() => handleSelectItem(element._id)}
+                            />
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            onClick={() =>
+                              handleEnterItem(element._id, element.type)
+                            }
+                          >
+                            {element.type === "lesson" ? "Урок" : "Тест"}
+                          </TableCell>
+                          <TableCell align="left">{element.title}</TableCell>
+                          <TableCell align="left">
+                            {element.completed ? "Завершений" : "В процесі"}
+                          </TableCell>
+                          <TableCell align="left">
+                            {format(new Date(element.createdAt), "dd/MM/yyyy")}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Box>
   );
 };
