@@ -14,7 +14,7 @@ const CourseList = ({ courses, onDelete, onEdit, onEnter }) => {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
       {courses.map((course) => (
-        <Card key={course._id} sx={{ width: 400, mb: 2 }}>
+        <Card key={course._id} sx={{ width: 480, mb: 2 }}>
           <CardContent>
           <CardMedia
           component="img"

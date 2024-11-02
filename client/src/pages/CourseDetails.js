@@ -13,9 +13,13 @@ import {
   TableRow,
   Paper,
   Checkbox,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { format } from "date-fns";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CustomButton from "../components/CustomButton";
 
 const CourseDetails = ({
@@ -27,7 +31,9 @@ const CourseDetails = ({
   const [newElements, setNewElements] = useState(elements);
   const [newLesson, setNewLesson] = useState("");
   const [newTest, setNewTest] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedElement, setSelectedElement] = useState(null);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -93,6 +99,7 @@ const CourseDetails = ({
     navigate(path, { state: { courseTitle } });
   };
 
+  
   const handleSelectItem = (id) => {
     setSelectedItems((prevSelected) =>
       prevSelected.includes(id)
@@ -101,31 +108,56 @@ const CourseDetails = ({
     );
   };
 
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
+   const handleMenuOpen = (event, element) => {
+     setAnchorEl(event.currentTarget);
+     setSelectedElement(element);
+   };
 
-    const reorderedElements = Array.from(newElements);
-    const [movedElement] = reorderedElements.splice(result.source.index, 1);
-    reorderedElements.splice(result.destination.index, 0, movedElement);
+   const handleMenuClose = () => {
+     setAnchorEl(null);
+     setSelectedElement(null);
+   };
 
-    setNewElements(reorderedElements);
+   const handleEditElement = () => {
+     console.log("Edit element:", selectedElement);
+     handleMenuClose();
+     // Логіка редагування елемента
+   };
 
-    // Оновлюємо порядок на сервері
-    try {
-      await Promise.all(
-        reorderedElements.map((element, index) =>
-          axios.patch(
-            `http://localhost:3000/api/${element.type}s/${element._id}/order`,
-            {
-              order: index + 1,
-            }
-          )
-        )
-      );
-    } catch (error) {
-      console.error("Error updating order:", error);
-    }
-  };
+   const handleDeleteElement = async () => {
+     console.log("Delete element:", selectedElement);
+     handleMenuClose();
+     // Логіка видалення елемента
+   }; 
+
+const handleDragEnd = async (result) => {
+  if (!result.destination) return;
+
+  const reorderedElements = Array.from(newElements);
+  const [movedElement] = reorderedElements.splice(result.source.index, 1);
+  reorderedElements.splice(result.destination.index, 0, movedElement);
+
+  setNewElements(reorderedElements);
+
+  // Оновлюємо порядок на сервері
+  try {
+    await Promise.all(
+      reorderedElements.map((element, index) => {
+        // Перевірка типу елемента для формування правильного шляху
+        const endpoint = element.type === "lesson" ? "lessons" : "tests";
+        return axios.patch(
+          `http://localhost:3000/api/${endpoint}/${element._id}/order`,
+          {
+            order: index + 1,
+          }
+        );
+      })
+    );
+  } catch (error) {
+    console.error("Error updating order:", error);
+  }
+};
+
 
   if (!courseTitle) return <Typography>Завантаження...</Typography>;
 
@@ -201,6 +233,7 @@ const CourseDetails = ({
                     <TableCell align="left">Назва</TableCell>
                     <TableCell align="left">Статус</TableCell>
                     <TableCell align="left">Дата створення</TableCell>
+                    <TableCell align="right">Дії</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -237,6 +270,25 @@ const CourseDetails = ({
                           </TableCell>
                           <TableCell align="left">
                             {format(new Date(element.createdAt), "dd/MM/yyyy")}
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              onClick={(e) => handleMenuOpen(e, element)}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                            <Menu
+                              anchorEl={anchorEl}
+                              open={Boolean(anchorEl)}
+                              onClose={handleMenuClose}
+                            >
+                              <MenuItem onClick={handleEditElement}>
+                                Редагувати
+                              </MenuItem>
+                              <MenuItem onClick={handleDeleteElement}>
+                                Видалити
+                              </MenuItem>
+                            </Menu>
                           </TableCell>
                         </TableRow>
                       )}
