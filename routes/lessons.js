@@ -1,48 +1,56 @@
-const express = require('express');
-const Lesson = require('../models/Lesson');
+const express = require("express");
+const Lesson = require("../models/Lesson");
+const Test = require("../models/Test"); // Додаємо для визначення загального порядку
 const router = express.Router();
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Отримати всі уроки для певного курсу в порядку order
-router.get('/courses/:id/lessons', async (req, res) => {
+router.get("/courses/:id/lessons", async (req, res) => {
   try {
-    const lessons = await Lesson.find({ courseId: req.params.id }).sort('order');
+    const lessons = await Lesson.find({ courseId: req.params.id }).sort(
+      "order"
+    );
     res.json(lessons);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-
 // Створити новий урок із встановленням порядку
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { title, content, courseId } = req.body;
 
   if (!courseId) {
-    return res.status(400).json({ message: 'courseId is required' });
+    return res.status(400).json({ message: "courseId is required" });
   }
 
   try {
-    // Визначаємо останній порядок для цього курсу
-    const lastLesson = await Lesson.findOne({ courseId }).sort('-order');
-    const order = lastLesson ? lastLesson.order + 1 : 1;
-
-    const newLesson = new Lesson({ title, content, courseId, order });
+    // Визначаємо останній порядковий номер для курсу серед уроків і тестів
+    const lastOrder = await getLastOrder(courseId);
+    const newLesson = new Lesson({
+      title,
+      content,
+      courseId,
+      order: lastOrder + 1,
+    });
     await newLesson.save();
     res.status(201).json(newLesson);
   } catch (error) {
-    res.status(500).json({ message: 'Не вдалося створити урок' });
+    res.status(500).json({ message: "Не вдалося створити урок" });
   }
 });
-  
-  
+
 // Оновити порядок уроків
-router.patch('/:id/order', async (req, res) => {
+router.patch("/:id/order", async (req, res) => {
   const { order } = req.body;
   try {
-    const updatedLesson = await Lesson.findByIdAndUpdate(req.params.id, { order }, { new: true });
+    const updatedLesson = await Lesson.findByIdAndUpdate(
+      req.params.id,
+      { order },
+      { new: true }
+    );
     if (!updatedLesson) {
-      return res.status(404).json({ message: 'Lesson not found' });
+      return res.status(404).json({ message: "Lesson not found" });
     }
     res.json(updatedLesson);
   } catch (error) {
@@ -51,15 +59,15 @@ router.patch('/:id/order', async (req, res) => {
 });
 
 // Отримати урок за ID
-router.get('/:id', getLesson, (req, res) => {
+router.get("/:id", getLesson, (req, res) => {
   res.json(res.lesson);
 });
 
 // Видалити урок
-router.delete('/:id', getLesson, async (req, res) => {
+router.delete("/:id", getLesson, async (req, res) => {
   try {
-    await Lesson.findByIdAndDelete(req.params.id); // Використовуємо findByIdAndDelete
-    res.json({ message: 'Lesson deleted' });
+    await Lesson.findByIdAndDelete(req.params.id);
+    res.json({ message: "Lesson deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -69,9 +77,9 @@ router.delete('/:id', getLesson, async (req, res) => {
 async function getLesson(req, res, next) {
   let lesson;
   try {
-    lesson = await Lesson.findById(req.params.id).populate('courseId'); // Включаємо дані про курс
+    lesson = await Lesson.findById(req.params.id).populate("courseId");
     if (lesson == null) {
-      return res.status(404).json({ message: 'Lesson not found' });
+      return res.status(404).json({ message: "Lesson not found" });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -81,18 +89,17 @@ async function getLesson(req, res, next) {
 }
 
 // Оновити урок
-router.patch('/:id', async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const { title, content, order } = req.body; // Отримуємо нові дані з тіла запиту, включаючи порядок
-
+    const { title, content, order } = req.body;
     const updatedLesson = await Lesson.findByIdAndUpdate(
       req.params.id,
-      { title, content, order }, // Оновлюємо і назву, і контент, і порядок
+      { title, content, order },
       { new: true }
     );
 
     if (!updatedLesson) {
-      return res.status(404).json({ message: 'Lesson not found' });
+      return res.status(404).json({ message: "Lesson not found" });
     }
 
     res.json(updatedLesson);
@@ -101,15 +108,12 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// Отримати уроки для певного курсу з урахуванням порядку
-router.get('/courses/:id/lessons', async (req, res) => {
-  try {
-    const lessons = await Lesson.find({ courseId: req.params.id }).sort('order'); // Сортуємо за order
-    res.json(lessons);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
+// Функція для визначення останнього порядку в курсі
+async function getLastOrder(courseId) {
+  const lastLesson = await Lesson.findOne({ courseId }).sort("-order");
+  const lastTest = await Test.findOne({ courseId }).sort("-order");
+  const lastOrder = Math.max(lastLesson?.order || 0, lastTest?.order || 0);
+  return lastOrder;
+}
 
 module.exports = router;

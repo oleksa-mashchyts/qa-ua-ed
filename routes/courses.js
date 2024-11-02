@@ -1,6 +1,5 @@
 const express = require('express');
 const Course = require('../models/Course');
-const courseSchema = require('../validators/courseValidator'); // Імпортуємо валідацію
 
 const router = express.Router();
 
@@ -162,6 +161,8 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Сталася помилка на сервері' });
   }
 });
+
+
 
 
 module.exports = router;

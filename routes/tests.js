@@ -1,11 +1,14 @@
 const express = require("express");
 const Test = require("../models/Test");
+const Lesson = require("../models/Lesson"); // Додаємо для визначення загального порядку
 const router = express.Router();
 
 // Отримати всі тести для певного курсу в порядку order
 router.get("/courses/:courseId/tests", async (req, res) => {
   try {
-    const tests = await Test.find({ courseId: req.params.courseId }).sort('order');
+    const tests = await Test.find({ courseId: req.params.courseId }).sort(
+      "order"
+    );
     res.json(tests);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -17,18 +20,15 @@ router.post("/", async (req, res) => {
   const { title, questions, courseId } = req.body;
 
   try {
-    // Визначаємо останній порядок для цього курсу
-    const lastTest = await Test.findOne({ courseId }).sort('-order');
-    const order = lastTest ? lastTest.order + 1 : 1;
-
-    const test = new Test({
+    // Визначаємо останній порядковий номер для курсу серед уроків і тестів
+    const lastOrder = await getLastOrder(courseId);
+    const newTest = new Test({
       title,
       questions,
       courseId,
-      order,
+      order: lastOrder + 1,
     });
-
-    const newTest = await test.save();
+    await newTest.save();
     res.status(201).json(newTest);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -39,7 +39,11 @@ router.post("/", async (req, res) => {
 router.patch("/:id/order", async (req, res) => {
   const { order } = req.body;
   try {
-    const updatedTest = await Test.findByIdAndUpdate(req.params.id, { order }, { new: true });
+    const updatedTest = await Test.findByIdAndUpdate(
+      req.params.id,
+      { order },
+      { new: true }
+    );
     if (!updatedTest) {
       return res.status(404).json({ message: "Test not found" });
     }
@@ -59,10 +63,9 @@ router.patch("/:id", async (req, res) => {
   const { title, questions, courseId, order } = req.body;
 
   try {
-    // Оновлюємо тест за допомогою findByIdAndUpdate, щоб зберегти атомарність операції
     const updatedTest = await Test.findByIdAndUpdate(
       req.params.id,
-      { title, questions, courseId, order }, // Оновлюємо поля, включаючи новий order
+      { title, questions, courseId, order },
       { new: true }
     );
 
@@ -90,7 +93,7 @@ router.delete("/:id", getTest, async (req, res) => {
 async function getTest(req, res, next) {
   let test;
   try {
-    test = await Test.findById(req.params.id).populate("courseId"); // Підтягнення даних курсу
+    test = await Test.findById(req.params.id).populate("courseId");
     if (test == null) {
       return res.status(404).json({ message: "Test not found" });
     }
@@ -101,14 +104,12 @@ async function getTest(req, res, next) {
   next();
 }
 
-// Отримати тести для певного курсу, впорядковані за order
-router.get("/courses/:courseId/tests", async (req, res) => {
-  try {
-    const tests = await Test.find({ courseId: req.params.courseId }).sort("order"); // Сортування за полем order
-    res.json(tests);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// Функція для визначення останнього порядку в курсі
+async function getLastOrder(courseId) {
+  const lastLesson = await Lesson.findOne({ courseId }).sort("-order");
+  const lastTest = await Test.findOne({ courseId }).sort("-order");
+  const lastOrder = Math.max(lastLesson?.order || 0, lastTest?.order || 0);
+  return lastOrder;
+}
 
 module.exports = router;

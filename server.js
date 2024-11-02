@@ -51,6 +51,7 @@ const coursesRouter = require('./routes/courses');
 const lessonsRouter = require('./routes/lessons');
 const testsRouter = require('./routes/tests');
 const userRouter = require('./routes/users');
+const courseElementsRouter = require("./routes/courseElements");
 //const uploadRouter = require('./routes/upload');
 
 
@@ -59,6 +60,7 @@ app.use('/api/courses', coursesRouter);
 app.use('/api/lessons', lessonsRouter);
 app.use('/api/tests', testsRouter);
 app.use('/api/users', userRouter);
+app.use("/api", courseElementsRouter);
 //app.use('/api/uploads', uploadRouter);
 
 
