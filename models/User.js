@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,14 +10,14 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // Забезпечує унікальність імейлу
+      unique: true,
       trim: true,
       lowercase: true,
     },
     password: {
       type: String,
       required: true,
-      minlength: 6, // Мінімальна довжина пароля
+      minlength: 6,
     },
     role: {
       type: String,
@@ -25,8 +25,41 @@ const userSchema = new mongoose.Schema(
       default: "student",
     },
     theme: { type: String, default: "light" },
+    avatar: { type: String, default: "" },
+    bio: { type: String, default: "" },
+    skills: [{ type: String }],
+    certifications: [{ type: String }],
+    achievements: [{ title: String, description: String, date: Date }], // Оновлено для зберігання докладної інформації
+    badges: [
+      { title: String, description: String, icon: String, awardedAt: Date },
+    ],
+
+    roadmap: [
+      {
+        category: { type: String, required: true },
+        subcategories: [
+          {
+            name: { type: String, required: true },
+            goals: [
+              {
+                title: { type: String, required: true },
+                description: { type: String },
+                completed: { type: Boolean, default: false },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+
+    cv: {
+      summary: { type: String, default: "" },
+      experience: [{ company: String, role: String, duration: String }],
+      education: [{ institution: String, degree: String, year: String }],
+      skills: [{ type: String }],
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

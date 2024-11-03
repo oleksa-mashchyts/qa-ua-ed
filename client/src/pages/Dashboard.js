@@ -43,7 +43,7 @@ const Dashboard = () => {
     { name: "Головна", path: "home", icon: <HomeIcon /> },
     { name: "Курси", path: "courses", icon: <SchoolIcon /> },
     { name: "Студенти", path: "students", icon: <PeopleIcon /> },
-    { name: "Вчителя", path: "teachers", icon: <PeopleIcon /> },
+    { name: "Вчителі", path: "teachers", icon: <PeopleIcon /> },
     { name: "Запитання", path: "questions", icon: <HelpIcon /> },
     { name: "Статистика", path: "statistics", icon: <BarChartIcon /> },
   ];

@@ -12,6 +12,11 @@ import Courses from './pages/Courses';
 import CourseDetails from './pages/CourseDetails';
 import { useAuth } from './context/AuthContext';
 import LessonView from './pages/LessonView';
+import TestView from "./pages/TestView";
+import UserProfile from "./pages/UserProfile";
+import RoadmapView from "./components/RoadmapView";
+import CVView from "./components/CVView";
+
 
 const App = () => {
   const { currentUser, isLoading, theme, updateUserTheme } = useAuth();
@@ -61,7 +66,10 @@ const App = () => {
               path="courses/:courseId/lessons/:lessonId"
               element={<LessonView />}
             />
-
+            <Route
+              path="courses/:courseId/tests/:testId"
+              element={<TestView />}
+            />
             {/* Новий маршрут для сторінки деталей курсу */}
             <Route path="courses/:courseId" element={<CourseDetails />} />
           </Route>
@@ -70,6 +78,9 @@ const App = () => {
             path="*"
             element={<Navigate to={currentUser ? "/dashboard" : "/"} />}
           />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile/roadmap" element={<RoadmapView />} />
+          <Route path="/profile/cv" element={<CVView />} />
         </Routes>
       </Box>
     </ThemeProvider>

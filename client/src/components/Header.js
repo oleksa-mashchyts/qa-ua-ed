@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   AppBar,
@@ -33,6 +33,13 @@ const Header = ({ toggleTheme, isDarkMode }) => {
   const { currentUser, logout } = useAuth();
   const [isLoginOpen, setLoginOpen] = React.useState(false);
   const [isRegisterOpen, setRegisterOpen] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    if (currentUser) {
+      navigate("/profile");
+    }
+  };  
 
   return (
     <>
@@ -40,7 +47,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-              UADx
+              ED
             </Link>
           </Typography>
           {currentUser ? (
@@ -71,6 +78,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
             size="large"
             aria-label="account of current user"
             color="inherit"
+            onClick={handleProfileClick}
           >
             <AccountCircle />
           </IconButton>

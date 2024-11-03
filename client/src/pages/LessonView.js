@@ -18,6 +18,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const LessonView = () => {
   const { lessonId, courseId } = useParams();
@@ -287,7 +288,13 @@ return (
         height: "100vh",
       }}
     >
-      {/* Відображаємо назву курсу */}
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+        sx={{ mb: 2 }}
+      >
+        Назад до курсу
+      </Button>
       <Typography variant="h5" gutterBottom>
         » {courseTitle}
       </Typography>{" "}
@@ -335,10 +342,8 @@ return (
           </Button>
         )}
       </Box>
-      
       {/* Роздільна лінія з аналогічним стилем */}
       <Divider sx={{ my: 2, borderColor: (theme) => theme.palette.divider }} />
-
       {/* Вміст уроку з підтримкою редагування */}
       {isEditing ? (
         <>
@@ -356,7 +361,6 @@ return (
       ) : (
         <div dangerouslySetInnerHTML={{ __html: content }} />
       )}
-      
       {/* Кнопка для перемикання між режимами редагування */}
       <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
         {isEditing ? "Скасувати" : "Редагувати"}

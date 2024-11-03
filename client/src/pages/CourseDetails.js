@@ -66,7 +66,8 @@ const CourseDetails = ({
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      setNewElements((prevElements) => [...prevElements, response.data]);
+      const newLessonData = { ...response.data, type: "lesson" }; // Додаємо поле type
+      setNewElements((prevElements) => [...prevElements, newLessonData]);
       setNewLesson("");
     } catch (error) {
       console.error("Error adding lesson:", error);
@@ -84,7 +85,8 @@ const CourseDetails = ({
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      setNewElements((prevElements) => [...prevElements, response.data]);
+       const newTestData = { ...response.data, type: "test" }; // Додаємо поле type
+       setNewElements((prevElements) => [...prevElements, newTestData]);
       setNewTest("");
     } catch (error) {
       console.error("Error adding test:", error);
@@ -118,17 +120,42 @@ const CourseDetails = ({
      setSelectedElement(null);
    };
 
+     const deleteLesson = async (lessonId) => {
+       try {
+         await axios.delete(`http://localhost:3000/api/lessons/${lessonId}`);
+         setNewElements((prevElements) =>
+           prevElements.filter((element) => element._id !== lessonId)
+         );
+       } catch (error) {
+         console.error("Error deleting lesson:", error);
+       }
+     };
+
+     const deleteTest = async (testId) => {
+       try {
+         await axios.delete(`http://localhost:3000/api/tests/${testId}`);
+         setNewElements((prevElements) =>
+           prevElements.filter((element) => element._id !== testId)
+         );
+       } catch (error) {
+         console.error("Error deleting test:", error);
+       }
+     };
+
    const handleEditElement = () => {
      console.log("Edit element:", selectedElement);
      handleMenuClose();
      // Логіка редагування елемента
    };
 
-   const handleDeleteElement = async () => {
-     console.log("Delete element:", selectedElement);
-     handleMenuClose();
-     // Логіка видалення елемента
-   }; 
+  const handleDeleteElement = () => {
+    if (selectedElement.type === "lesson") {
+      deleteLesson(selectedElement._id);
+    } else if (selectedElement.type === "test") {
+      deleteTest(selectedElement._id);
+    }
+    handleMenuClose();
+  };
 
 const handleDragEnd = async (result) => {
   if (!result.destination) return;
@@ -256,15 +283,23 @@ const handleDragEnd = async (result) => {
                               onChange={() => handleSelectItem(element._id)}
                             />
                           </TableCell>
+                          <TableCell align="left">
+                            {element.type === "lesson" ? "Урок" : "Тест"}
+                          </TableCell>
                           <TableCell
                             align="left"
                             onClick={() =>
                               handleEnterItem(element._id, element.type)
                             }
+                            sx={{
+                              cursor: "pointer",
+                              textDecoration: "none",
+                              color: "primary.main",
+                              "&:hover": { textDecoration: "underline" },
+                            }}
                           >
-                            {element.type === "lesson" ? "Урок" : "Тест"}
+                            {element.title}
                           </TableCell>
-                          <TableCell align="left">{element.title}</TableCell>
                           <TableCell align="left">
                             {element.completed ? "Завершений" : "В процесі"}
                           </TableCell>
