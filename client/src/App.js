@@ -14,6 +14,8 @@ import { useAuth } from './context/AuthContext';
 import LessonView from './pages/LessonView';
 import TestView from "./pages/TestView";
 import UserProfile from "./pages/UserProfile";
+import Main from "./pages/Main";
+import Settings from "./pages/Settings";
 import RoadmapView from "./components/RoadmapView";
 import CVView from "./components/CVView";
 
@@ -55,13 +57,12 @@ const App = () => {
             }
           >
             <Route index element={<Navigate to="home" />} />
-            <Route
-              path="home"
-              element={<Typography variant="h5">Головна</Typography>}
-            />
+            <Route path="home" element={<Main />} />{" "}
+            {/* Відображення Main.js */}
             <Route path="courses" element={<Courses />} />
             <Route path="students" element={<Students />} />
             <Route path="teachers" element={<Teachers />} />
+            <Route path="settings" element={<Settings />} />
             <Route
               path="courses/:courseId/lessons/:lessonId"
               element={<LessonView />}

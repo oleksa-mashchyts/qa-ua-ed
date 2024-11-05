@@ -22,6 +22,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import PeopleIcon from "@mui/icons-material/People";
 import HelpIcon from "@mui/icons-material/Help";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
@@ -46,6 +47,7 @@ const Dashboard = () => {
     { name: "Вчителі", path: "teachers", icon: <PeopleIcon /> },
     { name: "Запитання", path: "questions", icon: <HelpIcon /> },
     { name: "Статистика", path: "statistics", icon: <BarChartIcon /> },
+    { name: "Налаштування", path: "settings", icon: <SettingsIcon /> },
   ];
 
   const teacherPages = [

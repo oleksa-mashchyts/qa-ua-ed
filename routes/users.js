@@ -296,4 +296,22 @@ router.patch("/:id/roadmap", getUser, async (req, res) => {
   }
 });
 
+// Додати в users.js маршрут для отримання налаштувань користувача
+router.get("/:id/settings", getUser, (req, res) => {
+  res.json({ settings: res.user.settings });
+});
+
+// Додати маршрут для оновлення налаштувань
+router.patch("/:id/settings", getUser, async (req, res) => {
+  const { settings } = req.body;
+  try {
+    res.user.settings = settings;
+    const updatedUser = await res.user.save();
+    res.json({ settings: updatedUser.settings });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 module.exports = router;

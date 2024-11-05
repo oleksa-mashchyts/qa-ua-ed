@@ -24,6 +24,13 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "teacher", "student"],
       default: "student",
     },
+    settings: {
+      courses: { type: Boolean, default: false },
+      students: { type: Boolean, default: false },
+      teachers: { type: Boolean, default: false },
+      questions: { type: Boolean, default: false },
+      statistics: { type: Boolean, default: false },
+    },
     theme: { type: String, default: "light" },
     avatar: { type: String, default: "" },
     bio: { type: String, default: "" },
