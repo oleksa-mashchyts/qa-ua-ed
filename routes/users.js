@@ -43,9 +43,20 @@ router.get("/:id/profile", getUser, (req, res) => {
 
 // Оновити профіль користувача
 router.patch("/:id/profile", getUser, async (req, res) => {
-  const { bio, skills, certifications, achievements, roadmap, cv } = req.body;
+  const {
+    name,
+    bio,
+    email,
+    skills,
+    certifications,
+    achievements,
+    roadmap,
+    cv,
+  } = req.body;
   try {
+    if (name !== undefined) res.user.name = name;
     if (bio !== undefined) res.user.bio = bio;
+    if (email !== undefined) res.user.email = email;
     if (skills) res.user.skills = skills;
     if (certifications) res.user.certifications = certifications;
     if (achievements) res.user.achievements = achievements;

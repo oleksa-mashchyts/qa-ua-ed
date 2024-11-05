@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; 
+import JoditEditor from "jodit-react";
 import {
   Box,
   Typography,
   TextField,
   IconButton,
-  Tooltip,
   List,
   ListItem,
   ListItemButton,
@@ -19,19 +17,24 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useAuth } from "../context/AuthContext"; // Приклад отримання теми з контексту
+
 
 const LessonView = () => {
   const { lessonId, courseId } = useParams();
   const navigate = useNavigate();
-  const quillRef = useRef(null); // Створюємо реф для Quill редактора
-
+  const { theme: appTheme } = useAuth(); // Отримуємо тему з хука useAuth
   const [cachedLessons, setCachedLessons] = useState([]);
   const [lesson, setLesson] = useState(null);
-  const [courseTitle, setCourseTitle] = useState(""); // Додаємо стан для назви курсу
+  const [courseTitle, setCourseTitle] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState(""); // Стан для контенту
+  const [content, setContent] = useState("");
+  const [initialContent, setInitialContent] = useState(""); // Зберігаємо початковий контент
+  const editorRef = useRef(null); // Створюємо ref для редактора
+
+  
 
   const fetchLesson = useCallback(async () => {
     try {
@@ -40,19 +43,19 @@ const LessonView = () => {
       );
       setLesson(response.data);
       setNewTitle(response.data.title);
-      setContent(response.data.content); // Ініціалізуємо контент
+      setContent(response.data.content);
+      setInitialContent(response.data.content); // Ініціалізуємо початковий контент
     } catch (error) {
       console.error("Error fetching lesson:", error);
     }
   }, [lessonId]);
 
-  // Завантажуємо назву курсу
   const fetchCourseTitle = useCallback(async () => {
     try {
       const response = await axios.get(
         `http://localhost:3000/api/courses/${courseId}`
       );
-      setCourseTitle(response.data.title); // Зберігаємо назву курсу
+      setCourseTitle(response.data.title);
     } catch (error) {
       console.error("Error fetching course title:", error);
     }
@@ -60,7 +63,7 @@ const LessonView = () => {
 
   useEffect(() => {
     fetchLesson();
-    fetchCourseTitle(); // Викликаємо завантаження назви курсу
+    fetchCourseTitle();
   }, [fetchLesson, fetchCourseTitle]);
 
   useEffect(() => {
@@ -93,23 +96,15 @@ const LessonView = () => {
     }
   };
 
-  const cleanContent = (html) => {
-    return html
-      .replace(/<p><br><\/p>/g, "") // Видаляємо порожні абзаци
-      .replace(/<p>(.*?)<\/p>/g, "$1<br>") // Заміна <p> на <br> для кращої сумісності
-      .replace(/(<br>\s*)+$/g, ""); // Видаляємо зайві <br> в кінці
-  };
-
   const handleSaveContent = async () => {
-    const cleanedContent = cleanContent(content); // Очищений контент
-
     try {
       await axios.patch(
         `http://localhost:3000/api/lessons/${lessonId}`,
-        { content: cleanedContent },
+        { content },
         { headers: { "Content-Type": "application/json" } }
       );
       setIsEditing(false);
+      setInitialContent(content); // Оновлюємо початковий контент після збереження
     } catch (error) {
       console.error("Error saving content:", error);
       alert("Не вдалося зберегти зміни контенту.");
@@ -117,257 +112,210 @@ const LessonView = () => {
   };
 
   const handleCancelEdit = () => {
-    setNewTitle(lesson.title);
+    if (lesson) setNewTitle(lesson.title);
     setIsEditingTitle(false);
   };
 
-  const toggleEditTitle = () => setIsEditingTitle(!isEditingTitle);
-
-  const modules = {
-    toolbar: {
-      container: "#toolbar", // Вказуємо ідентифікатор для кастомної панелі
-    },
-    clipboard: {
-      matchVisual: false, // Запобігає зайвим <p> і <br> при вставці
-    },
+  const handleCancelContentEdit = () => {
+    setContent(initialContent); // Повертаємо початковий контент
+    setIsEditing(false); // Просто виходимо з режиму редагування без збереження змін у контенті
   };
 
-  const renderToolbar = () => (
-    <div id="toolbar">
-      <Tooltip title="Заголовок 1" arrow>
-        <button className="ql-header" value="1" />
-      </Tooltip>
-      <Tooltip title="Заголовок 2" arrow>
-        <button className="ql-header" value="2" />
-      </Tooltip>
-      <Tooltip title="Жирний" arrow>
-        <button className="ql-bold" />
-      </Tooltip>
-      <Tooltip title="Курсив" arrow>
-        <button className="ql-italic" />
-      </Tooltip>
-      <Tooltip title="Підкреслений" arrow>
-        <button className="ql-underline" />
-      </Tooltip>
-      <Tooltip title="Закреслений" arrow>
-        <button className="ql-strike" />
-      </Tooltip>
-      <Tooltip title="Цитата" arrow>
-        <button className="ql-blockquote" />
-      </Tooltip>
-      <Tooltip title="Код-блок" arrow>
-        <button className="ql-code-block" />
-      </Tooltip>
-      <Tooltip title="Маркерований список" arrow>
-        <button className="ql-list" value="bullet" />
-      </Tooltip>
-      <Tooltip title="Нумерований список" arrow>
-        <button className="ql-list" value="ordered" />
-      </Tooltip>
-      <Tooltip title="Вставити посилання" arrow>
-        <button className="ql-link" />
-      </Tooltip>
-      <Tooltip title="Вирівнювання тексту" arrow>
-        <select className="ql-align">
-          <option defaultValue></option>
-          <option value="center" />
-          <option value="right" />
-          <option value="justify" />
-        </select>
-      </Tooltip>
-      <Tooltip title="Вибрати колір тексту" arrow>
-        <select className="ql-color" />
-      </Tooltip>
-      <Tooltip title="Вибрати колір фону" arrow>
-        <select className="ql-background" />
-      </Tooltip>
-      <Tooltip title="Очистити форматування" arrow>
-        <button className="ql-clean" />
-      </Tooltip>
-      <Tooltip title="Вставити зображення" arrow>
-        <button
-          className="ql-image"
-          onClick={() => handleFileUpload("image")}
-        />
-      </Tooltip>
-      <Tooltip title="Вставити відео" arrow>
-        <button
-          className="ql-video"
-          onClick={() => handleFileUpload("video")}
-        />
-      </Tooltip>
-    </div>
-  );
+  const toggleEditTitle = () => setIsEditingTitle(!isEditingTitle);
+  const toggleEditContent = () => setIsEditing(!isEditing);
 
-  const handleFileUpload = (type) => {
+ // Функція завантаження зображення
+  const handleImageUpload = async () => {
     const input = document.createElement("input");
-    input.setAttribute("type", "file");
+    input.type = "file";
+    input.accept = "image/*";
 
-    // Дозволяємо тільки певні типи файлів
-    if (type === "image") {
-      input.setAttribute("accept", "image/*");
-    } else if (type === "video") {
-      input.setAttribute("accept", "video/*");
-    }
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (file && editorRef.current) {
+        const formData = new FormData();
+        formData.append("file", file);
 
-    input.click();
+        try {
+          const response = await axios.post(
+            "http://localhost:3001/api/uploads",
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
 
-    input.onchange = async () => {
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const res = await axios.post("/api/uploads", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        const url = res.data.url; // Отримуємо URL завантаженого файлу
-        const range = quillRef.current.getEditor().getSelection();
-
-        if (type === "image") {
-           quillRef.current.getEditor().insertEmbed(range.index, "image", url);
-        } else if (type === "video") {
-          quillRef.current.getEditor().insertEmbed(range.index, "video", url);
+          if (response.data && response.data.url) {
+            const imgTag = `<img src="${response.data.url}" alt="Зображення" />`;
+            setContent((prevContent) => prevContent + imgTag);
+          } else {
+            console.error(
+              "Невірний формат відповіді від сервера:",
+              response.data
+            );
+            alert(
+              "Не вдалося завантажити зображення: невірний формат відповіді"
+            );
+          }
+        } catch (error) {
+          console.error("Помилка завантаження зображення:", error);
+          alert("Не вдалося завантажити зображення");
         }
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        alert("Не вдалося завантажити файл.");
       }
     };
+
+    // Відкриваємо діалог вибору файлу
+    input.click();
   };
 
-  if (!lesson) return <Typography>Завантаження...</Typography>;
 
-return (
-  <Box sx={{ display: "flex", height: "100vh" }}>
-    {/* Ліва панель зі списком уроків */}
-    <Box
-      sx={{
-        width: "240px",
-        borderRight: (theme) => `1px solid ${theme.palette.divider}`, // Застосовано стиль роздільної лінії
-        padding: 2,
-        overflowY: "auto", // Незалежний скрол для лівої панелі
-        maxHeight: "100vh",
-        position: "fixed", // Фіксуємо панель
-        top: 100,
-        height: "100vh", // Зберігаємо повну висоту для лівої панелі
-      }}
-    >
-      <Typography variant="h6">Уроки:</Typography>
-      <List>
-        {cachedLessons.length ? (
-          cachedLessons.map((lesson) => (
-            <ListItem key={lesson._id}>
-              <ListItemButton
-                onClick={() =>
-                  navigate(
-                    `/dashboard/courses/${courseId}/lessons/${lesson._id}`
-                  )
-                }
-              >
-                {lesson.title}
-              </ListItemButton>
-            </ListItem>
-          ))
-        ) : (
-          <Typography>Уроків ще немає.</Typography>
-        )}
-      </List>
-    </Box>
 
-    {/* Основний контент уроку */}
-    <Box
-      sx={{
-        flexGrow: 1,
-        padding: 3,
-        overflowY: "auto", // Незалежний скрол для правої панелі
-        marginLeft: "240px", // Відступ зліва, щоб уникнути перекриття лівою панеллю
-        height: "100vh",
-      }}
-    >
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(`/dashboard/courses/${courseId}`)}
-        sx={{ mb: 2 }}
+  // Конфігурація Jodit з урахуванням теми
+const editorConfig = {
+  readonly: !isEditing,
+  theme: appTheme === "dark" ? "dark" : "default",
+  toolbarSticky: false,
+  extraButtons: [
+    {
+      name: "uploadImage",
+      iconURL: "https://img.icons8.com/material-outlined/24/000000/upload.png",
+      tooltip: "Завантажити зображення",
+      exec: handleImageUpload,
+    },
+  ],
+  style: {
+    backgroundColor: appTheme === "dark" ? "#262626" : "#fff",
+    color: appTheme === "dark" ? "#f0f0f0" : "#000",
+  },
+};
+
+
+
+
+  if (!lesson) {
+    return <Typography>Завантаження...</Typography>; // Відображаємо повідомлення, поки lesson не завантажено
+  }
+
+  return (
+    <Box sx={{ display: "flex", height: "100vh" }}>
+      <Box
+        sx={{
+          width: "240px",
+          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+          padding: 2,
+          overflowY: "auto",
+          maxHeight: "100vh",
+          position: "fixed",
+          top: 100,
+          height: "100vh",
+        }}
       >
-        Назад до курсу
-      </Button>
-      <Typography variant="h5" gutterBottom>
-        » {courseTitle}
-      </Typography>{" "}
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        {/* Заголовок уроку з можливістю редагування */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {isEditingTitle ? (
-            <TextField
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              variant="outlined"
-              size="small"
-              sx={{ flexGrow: 1 }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSaveTitle();
-                }
-              }}
-            />
+        <Typography variant="h6">Уроки:</Typography>
+        <List>
+          {cachedLessons.length ? (
+            cachedLessons.map((lesson) => (
+              <ListItem key={lesson._id}>
+                <ListItemButton
+                  onClick={() =>
+                    navigate(
+                      `/dashboard/courses/${courseId}/lessons/${lesson._id}`
+                    )
+                  }
+                >
+                  {lesson.title}
+                </ListItemButton>
+              </ListItem>
+            ))
           ) : (
-            <Typography variant="h4">{lesson.title}</Typography>
+            <Typography>Уроків ще немає.</Typography>
           )}
+        </List>
+      </Box>
 
-          {/* Кнопки для збереження та скасування редагування заголовка */}
-          {isEditingTitle ? (
-            <>
-              <IconButton onClick={handleSaveTitle} color="primary">
-                <SaveIcon />
+      <Box
+        sx={{
+          flexGrow: 1,
+          padding: 3,
+          overflowY: "auto",
+          marginLeft: "240px",
+          height: "100vh",
+        }}
+      >
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+          sx={{ mb: 2 }}
+        >
+          Назад до курсу
+        </Button>
+        <Typography variant="h5" gutterBottom>
+          » {courseTitle}
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {isEditingTitle ? (
+              <TextField
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{ flexGrow: 1 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSaveTitle();
+                  }
+                }}
+              />
+            ) : (
+              <Typography variant="h4">{lesson.title}</Typography>
+            )}
+            {isEditingTitle ? (
+              <>
+                <IconButton onClick={handleSaveTitle} color="primary">
+                  <SaveIcon />
+                </IconButton>
+                <IconButton onClick={handleCancelEdit} color="secondary">
+                  <CancelIcon />
+                </IconButton>
+              </>
+            ) : (
+              <IconButton onClick={toggleEditTitle}>
+                <EditIcon />
               </IconButton>
-              <IconButton onClick={handleCancelEdit} color="secondary">
-                <CancelIcon />
-              </IconButton>
-            </>
+            )}
+          </Box>
+          {isEditing ? (
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {" "}
+              {/* Новий контейнер для вирівнювання кнопок */}
+              <Button variant="contained" onClick={handleSaveContent}>
+                Зберегти
+              </Button>
+              <Button variant="outlined" onClick={handleCancelContentEdit}>
+                Скасувати
+              </Button>
+            </Box>
           ) : (
-            <IconButton onClick={toggleEditTitle}>
-              <EditIcon />
-            </IconButton>
+            <Button variant="outlined" onClick={toggleEditContent}>
+              Редагувати контент
+            </Button>
           )}
         </Box>
+        <Divider sx={{ my: 2 }} />
 
-        {/* Кнопка збереження контенту */}
-        {isEditing && (
-          <Button variant="contained" onClick={handleSaveContent}>
-            Зберегти
-          </Button>
+        {isEditing ? (
+          // Відображення редактора у режимі редагування
+          <JoditEditor
+            ref={editorRef}
+            value={content}
+            config={editorConfig}
+            onBlur={(newContent) => setContent(newContent)}
+          />
+        ) : (
+          // Відображення контенту як HTML, коли не редагується
+          <div dangerouslySetInnerHTML={{ __html: content }} />
         )}
       </Box>
-      {/* Роздільна лінія з аналогічним стилем */}
-      <Divider sx={{ my: 2, borderColor: (theme) => theme.palette.divider }} />
-      {/* Вміст уроку з підтримкою редагування */}
-      {isEditing ? (
-        <>
-          {/* Панель інструментів для редактора */}
-          {renderToolbar()}
-          <ReactQuill
-            ref={quillRef}
-            value={content}
-            onChange={setContent}
-            modules={modules} // Додаємо конфігурацію
-            theme="snow"
-            style={{ height: "400px", marginBottom: "20px" }}
-          />
-        </>
-      ) : (
-        <div dangerouslySetInnerHTML={{ __html: content }} />
-      )}
-      {/* Кнопка для перемикання між режимами редагування */}
-      <Button sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
-        {isEditing ? "Скасувати" : "Редагувати"}
-      </Button>
     </Box>
-  </Box>
-);
-}
+  );
+};
 
 export default LessonView;

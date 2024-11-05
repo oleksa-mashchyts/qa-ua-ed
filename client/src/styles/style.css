@@ -129,7 +129,7 @@ input {
 
 /* CSS для карток курсів */
 .MuiCard-root {
-  margin: 16px;
+  margin: 8px;
   transition: transform 0.3s;
 }
 

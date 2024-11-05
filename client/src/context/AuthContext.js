@@ -5,11 +5,14 @@ import axios from "axios";
 
 const AuthContext = createContext();
 
+
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light"); // Зчитуємо тему з localStorage
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     try {
@@ -95,9 +98,11 @@ export function AuthProvider({ children }) {
     navigate("/");
   };
 
+ 
+
   return (
     <AuthContext.Provider
-      value={{ currentUser, isLoading, login, logout, theme, updateUserTheme }}
+      value={{ currentUser, setCurrentUser, isLoading, login, logout, theme, updateUserTheme }}
     >
       {children}
     </AuthContext.Provider>

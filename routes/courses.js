@@ -136,6 +136,23 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+// Оновити зображення курсу
+router.patch('/:id/image', async (req, res) => {
+  const { imageUrl } = req.body;
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    course.imageUrl = imageUrl;
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 router.put('/:id', async (req, res) => {
   try {
     const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });

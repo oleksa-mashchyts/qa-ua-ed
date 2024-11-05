@@ -24,22 +24,25 @@ const Courses = () => {
   const [courseToDelete, setCourseToDelete] = useState(null); // ID курсу для видалення
   const [isEditing, setIsEditing] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
-  const [newCourse, setNewCourse] = useState({ title: '', description: '', duration: '' });
+  const [newCourse, setNewCourse] = useState({
+    title: "",
+    description: "",
+    duration: "",
+  });
   const { isLoading, currentUser } = useAuth();
   const navigate = useNavigate(); // Навігація через useNavigate
 
   const handleEnterCourse = (courseId) => {
     navigate(`/dashboard/courses/${courseId}`);
   };
-  
 
   // Завантаження курсів із сервера
   const fetchCourses = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/courses');
+      const response = await axios.get("http://localhost:3000/api/courses");
       setCourses(response.data);
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error("Error fetching courses:", error);
     }
   };
 
@@ -49,7 +52,15 @@ const Courses = () => {
     }
   }, [isLoading, currentUser]);
 
-  
+  // Функція для оновлення зображення курсу без перезавантаження сторінки
+  const handleUpdateCourseImage = (courseId, newImageUrl) => {
+    setCourses((prevCourses) =>
+      prevCourses.map((course) =>
+        course._id === courseId ? { ...course, imageUrl: newImageUrl } : course
+      )
+    );
+  };
+
   // Збереження курсу
   const handleSaveCourse = async (e) => {
     e.preventDefault();
@@ -65,12 +76,15 @@ const Courses = () => {
           )
         );
       } else {
-        const response = await axios.post('http://localhost:3000/api/courses', newCourse);
+        const response = await axios.post(
+          "http://localhost:3000/api/courses",
+          newCourse
+        );
         setCourses((prevCourses) => [...prevCourses, response.data]);
       }
       handleClose();
     } catch (error) {
-      console.error('Error saving course:', error);
+      console.error("Error saving course:", error);
     }
   };
 
@@ -78,10 +92,12 @@ const Courses = () => {
   const handleDeleteCourse = async () => {
     try {
       await axios.delete(`http://localhost:3000/api/courses/${courseToDelete}`);
-      setCourses((prevCourses) => prevCourses.filter((course) => course._id !== courseToDelete));
+      setCourses((prevCourses) =>
+        prevCourses.filter((course) => course._id !== courseToDelete)
+      );
       handleCloseConfirm(); // Закриваємо діалог підтвердження
     } catch (error) {
-      console.error('Error deleting course:', error);
+      console.error("Error deleting course:", error);
     }
   };
 
@@ -109,7 +125,7 @@ const Courses = () => {
       });
     } else {
       setIsEditing(false);
-      setNewCourse({ title: '', description: '', duration: '' });
+      setNewCourse({ title: "", description: "", duration: "" });
     }
     setOpen(true);
   };
@@ -126,22 +142,25 @@ const Courses = () => {
 
   return (
     <Box sx={{ padding: 2 }}>
-      <Typography variant="h4" gutterBottom>Список курсів</Typography>
+      <Typography variant="h4" gutterBottom>
+        Список курсів
+      </Typography>
       <CustomButton onClick={() => handleOpen()} sx={{ mb: 2 }}>
         Додати курс
       </CustomButton>
 
-      <CourseList 
-      courses={courses} 
-      onDelete={handleOpenConfirm} 
-      onEdit={handleOpen}
-      onEnter={handleEnterCourse}
-     />
+      <CourseList
+        courses={courses}
+        onDelete={handleOpenConfirm}
+        onEdit={handleOpen}
+        onEnter={handleEnterCourse}
+        onUpdateCourseImage={handleUpdateCourseImage} // Передаємо функцію для оновлення зображення
+      />
 
       <CustomModal
         open={open}
         onClose={handleClose}
-        title={isEditing ? 'Редагувати курс' : 'Додати новий курс'}
+        title={isEditing ? "Редагувати курс" : "Додати новий курс"}
       >
         <form onSubmit={handleSaveCourse}>
           <TextField
@@ -172,17 +191,25 @@ const Courses = () => {
             required
             margin="normal"
           />
-          <CustomButton type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-            {isEditing ? 'Зберегти зміни' : 'Додати курс'}
+          <CustomButton
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            {isEditing ? "Зберегти зміни" : "Додати курс"}
           </CustomButton>
         </form>
       </CustomModal>
 
       <Dialog open={confirmOpen} onClose={handleCloseConfirm}>
-        <DialogTitle sx={{ color: 'text.primary' }}>Підтвердження видалення</DialogTitle>
+        <DialogTitle sx={{ color: "text.primary" }}>
+          Підтвердження видалення
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Ви впевнені, що хочете видалити цей курс? Цю дію неможливо скасувати.
+            Ви впевнені, що хочете видалити цей курс? Цю дію неможливо
+            скасувати.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

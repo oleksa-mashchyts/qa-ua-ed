@@ -7,7 +7,7 @@ const courseSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (value) => isLength(value, { min: 1, max: 100 }),
-      message: 'Title must be between 1 and 100 characters long.',
+      message: "Title must be between 1 and 100 characters long.",
     },
   },
   description: {
@@ -15,7 +15,7 @@ const courseSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (value) => isLength(value, { min: 1, max: 500 }),
-      message: 'Description must be between 1 and 500 characters long.',
+      message: "Description must be between 1 and 500 characters long.",
     },
   },
   duration: {
@@ -23,7 +23,7 @@ const courseSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (value) => Number.isInteger(value) && value > 0, // Валідація на позитивне ціле число
-      message: 'Duration must be a positive integer.',
+      message: "Duration must be a positive integer.",
     },
     /*validate: {
       validator: (value) => isInt(value, { min: 1 }), // Стара валідація, яка очікувала рядок, а не число
@@ -34,10 +34,16 @@ const courseSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  lessons: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Lesson' // посилання на модель Lesson
-  }]
+  imageUrl: {
+    type: String,
+    default: "", // Початкове значення порожнє
+  }, 
+  lessons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Lesson", // посилання на модель Lesson
+    },
+  ],
 });
 
 const Course = mongoose.model('Course', courseSchema);
