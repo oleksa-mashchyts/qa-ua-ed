@@ -23,7 +23,7 @@ axios.defaults.baseURL = "http://localhost:3000";
 
 
 const UserProfile = () => {
-  const { currentUser, setCurrentUser } = useAuth();
+  const { currentUser, setCurrentUser, updateUserAvatar } = useAuth();
   const [profile, setProfile] = useState({});
   const [isEditing, setIsEditing] = useState(false);
     const [editedProfile, setEditedProfile] = useState({
@@ -70,13 +70,12 @@ const UserProfile = () => {
       const avatarUrl = uploadResponse.data.url;
 
       // Оновлення URL аватара в профілі
-      await axios.patch(
-        `/api/users/${currentUser._id}/avatar`,
-        { avatarUrl },
+      await axios.patch(`/api/users/${currentUser._id}/avatar`, { avatarUrl },
         {
           headers: { "Content-Type": "application/json" },
         }
       );
+       updateUserAvatar(avatarUrl); 
       setProfile((prevProfile) => ({ ...prevProfile, avatar: avatarUrl }));
     } catch (error) {
       console.error("Error uploading avatar:", error);

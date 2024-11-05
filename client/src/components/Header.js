@@ -8,13 +8,15 @@ import {
   Button,
   Modal,
   Box,
-  Switch, 
+  Switch,
+  Avatar,
 } from "@mui/material";
 
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import IconButton from "@mui/material/IconButton";
+
 
 
 const style = {
@@ -80,7 +82,11 @@ const Header = ({ toggleTheme, isDarkMode }) => {
             color="inherit"
             onClick={handleProfileClick}
           >
-            <AccountCircle />
+            {currentUser?.avatar ? (
+              <Avatar src={currentUser.avatar} alt="User Avatar" /> // Відображаємо аватар
+            ) : (
+              <AccountCircle /> // Силует за замовчуванням
+            )}
           </IconButton>
         </Toolbar>
       </AppBar>

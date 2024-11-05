@@ -69,9 +69,31 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUserAvatar = async (avatarUrl) => {
+    if (currentUser && currentUser._id) {
+      try {
+        await axios.patch(
+          `http://localhost:3000/api/users/${currentUser._id}/avatar`,
+          {
+            avatarUrl,
+          }
+        );
+        // Оновлюємо аватар у поточному стані та localStorage
+        const updatedUser = { ...currentUser, avatar: avatarUrl };
+        setCurrentUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } catch (error) {
+        console.error("Error updating avatar:", error);
+      }
+    }
+  };
+
+
   const login = async (credentials) => {
     try {
       const user = await loginUser(credentials); // Пряме отримання користувача
+      console.log("Поточний користувач після логіну:", user);
+
       console.log("User logged in:", user); // Лог для перевірки
 
       if (!user || !user._id) {
@@ -102,7 +124,16 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, setCurrentUser, isLoading, login, logout, theme, updateUserTheme }}
+      value={{
+        currentUser,
+        setCurrentUser,
+        isLoading,
+        login,
+        logout,
+        theme,
+        updateUserTheme,
+        updateUserAvatar,
+      }}
     >
       {children}
     </AuthContext.Provider>
