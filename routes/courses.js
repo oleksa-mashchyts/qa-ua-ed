@@ -3,6 +3,16 @@ const Course = require('../models/Course');
 
 const router = express.Router();
 
+// Отримати кількість курсів
+router.get("/count", async (req, res) => {
+  try {
+    const courseCount = await Course.countDocuments();
+    res.json({ count: courseCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 /**
  * @swagger
  * /api/courses:
@@ -179,6 +189,15 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Отримати кількість курсів
+router.get("/count", async (req, res) => {
+  try {
+    const courseCount = await Course.countDocuments();
+    res.json({ count: courseCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 

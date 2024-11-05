@@ -55,6 +55,14 @@ const Settings = () => {
     }
   };
 
+  const optionLabels = {
+    courses: "Курси",
+    students: "Студенти",
+    teachers: "Вчителі",
+    questions: "Запитання",
+    statistics: "Статистика",
+  };
+
   return (
     <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>
@@ -74,7 +82,7 @@ const Settings = () => {
                   name={option}
                 />
               }
-              label={option.charAt(0).toUpperCase() + option.slice(1)}
+              label={optionLabels[option]}
             />
           )
         )}

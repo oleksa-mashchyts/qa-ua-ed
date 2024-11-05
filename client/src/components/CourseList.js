@@ -53,6 +53,8 @@ const CourseList = ({
     return <Typography variant="h6">Курси відсутні.</Typography>;
   }
 
+  
+
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
       {courses.map((course) => (

@@ -127,25 +127,10 @@ router.patch("/:id/theme", async (req, res) => {
     }
   });
 
-// Middleware для отримання користувача по ID
-async function getUser(req, res, next) {
-  console.log("Отримання користувача з ID:", req.params.id);
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).json({ message: "Invalid ID format" });
-  }
 
-  let user;
-  try {
-    user = await User.findById(req.params.id);
-    if (user == null) {
-      return res.status(404).json({ message: "User not found" });
-    }
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
-  res.user = user;
-  next();
-}
+
+
+
 
 
 
@@ -313,5 +298,44 @@ router.patch("/:id/settings", getUser, async (req, res) => {
   }
 });
 
+  // Отримати кількість студентів
+router.get("/count/students", async (req, res) => {
+  try {
+    const studentCount = await User.countDocuments({ role: "student" });
+    res.json({ count: studentCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Отримати кількість вчителів
+router.get("/count/teachers", async (req, res) => {
+  try {
+    const teacherCount = await User.countDocuments({ role: "teacher" });
+    res.json({ count: teacherCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Middleware для отримання користувача по ID
+async function getUser(req, res, next) {
+  console.log("Отримання користувача з ID:", req.params.id);
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  let user;
+  try {
+    user = await User.findById(req.params.id);
+    if (user == null) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+  res.user = user;
+  next();
+}
 
 module.exports = router;

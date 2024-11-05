@@ -7,6 +7,11 @@ import { useAuth } from "../context/AuthContext";
 const Main = () => {
   const { currentUser } = useAuth();
   const [settings, setSettings] = useState({});
+    const [counts, setCounts] = useState({
+      courses: 0,
+      students: 0,
+      teachers: 0,
+    });
 
   useEffect(() => {
     // Завантаження налаштувань користувача
@@ -16,20 +21,48 @@ const Main = () => {
       );
       setSettings(response.data.settings || {});
     };
+
+    // Завантаження кількості курсів, студентів та вчителів
+    const fetchCounts = async () => {
+      try {
+        const [coursesRes, studentsRes, teachersRes] = await Promise.all([
+          axios.get("/api/courses/count"),
+          axios.get("/api/users/count/students"),
+          axios.get("/api/users/count/teachers"),
+        ]);
+
+        setCounts({
+          courses: coursesRes.data.count,
+          students: studentsRes.data.count,
+          teachers: teachersRes.data.count,
+        });
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+      }
+    };
+
     fetchSettings();
+    fetchCounts();
   }, [currentUser]);
 
   const cardData = [
-    { name: "Курси", path: "/dashboard/courses", enabled: settings.courses },
+    {
+      name: "Курси",
+      path: "/dashboard/courses",
+      enabled: settings.courses,
+      count: counts.courses,
+    },
     {
       name: "Студенти",
       path: "/dashboard/students",
       enabled: settings.students,
+      count: counts.students,
     },
     {
       name: "Вчителі",
       path: "/dashboard/teachers",
       enabled: settings.teachers,
+      count: counts.teachers,
     },
     {
       name: "Запитання",
@@ -54,10 +87,24 @@ const Main = () => {
               key={card.name}
               component={Link}
               to={card.path}
-              sx={{ width: 200, textDecoration: "none", color: "inherit" }}
+              sx={{
+                width: 200,
+                textDecoration: "none",
+                color: "inherit",
+                width: 200,
+                height: 200,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
               <CardContent>
                 <Typography variant="h6">{card.name}</Typography>
+                {card.count !== undefined && (
+                  <Typography variant="body2">
+                    Кількість: {card.count}
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           ))}
