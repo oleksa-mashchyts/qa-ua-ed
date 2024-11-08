@@ -118,28 +118,32 @@ return (
       <List>
         {pages.map((page) => (
           <ListItem key={page.path} disablePadding sx={{ display: "block" }}>
-            <Tooltip title={page.name} placement="right" disableHoverListener={isDrawerOpen}>
-            <ListItemButton
-              component={Link}
-              to={`/dashboard/${page.path}`}
-              selected={location.pathname === `/dashboard/${page.path}`}
-              sx={{
-                minHeight: 48,
-                justifyContent: isDrawerOpen ? "initial" : "center",
-                px: 2.5,
-              }}
+            <Tooltip
+              title={page.name}
+              placement="right"
+              disableHoverListener={isDrawerOpen}
             >
-              <ListItemIcon
+              <ListItemButton
+                component={Link}
+                to={`/dashboard/${page.path}`}
+                selected={location.pathname === `/dashboard/${page.path}`}
                 sx={{
-                  minWidth: 0,
-                  mr: isDrawerOpen ? 3 : "auto",
-                  justifyContent: "center",
+                  minHeight: 48,
+                  justifyContent: isDrawerOpen ? "initial" : "center",
+                  px: 2.5,
                 }}
               >
-                {page.icon}
-              </ListItemIcon>
-              {isDrawerOpen && <ListItemText primary={page.name} />}
-            </ListItemButton>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: isDrawerOpen ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  {page.icon}
+                </ListItemIcon>
+                {isDrawerOpen && <ListItemText primary={page.name} />}
+              </ListItemButton>
             </Tooltip>
           </ListItem>
         ))}
@@ -152,6 +156,7 @@ return (
       sx={{
         flexGrow: 1,
         p: 3,
+        minHeight: "100vh",
         width: `calc(100% - ${isDrawerOpen ? drawerWidth : collapsedWidth}px)`,
         transition: theme.transitions.create("margin-left", {
           easing: theme.transitions.easing.sharp,

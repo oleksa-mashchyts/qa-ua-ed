@@ -19,11 +19,10 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useAuth } from "../context/AuthContext"; // Приклад отримання теми з контексту
 
-
 const LessonView = () => {
   const { lessonId, courseId } = useParams();
   const navigate = useNavigate();
-  const { theme: appTheme } = useAuth(); // Отримуємо тему з хука useAuth
+  const { theme: appTheme } = useAuth();
   const [cachedLessons, setCachedLessons] = useState([]);
   const [lesson, setLesson] = useState(null);
   const [courseTitle, setCourseTitle] = useState("");
@@ -33,8 +32,7 @@ const LessonView = () => {
   const [content, setContent] = useState("");
   const [initialContent, setInitialContent] = useState(""); // Зберігаємо початковий контент
   const editorRef = useRef(null); // Створюємо ref для редактора
-
-  
+  const [structure, setStructure] = useState([]); // Структура уроків і тестів
 
   const fetchLesson = useCallback(async () => {
     try {
@@ -67,19 +65,20 @@ const LessonView = () => {
   }, [fetchLesson, fetchCourseTitle]);
 
   useEffect(() => {
-    const fetchLessons = async () => {
+    // Використання наявного маршруту для отримання структури курсу
+    const fetchStructure = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/lessons/courses/${courseId}/lessons`
+          `http://localhost:3000/api/courses/${courseId}/elements`
         );
-        setCachedLessons(response.data);
+        setStructure(response.data);
       } catch (error) {
-        console.error("Error fetching lessons:", error);
+        console.error("Error fetching course structure:", error);
       }
     };
 
-    if (!cachedLessons.length) fetchLessons();
-  }, [courseId, cachedLessons]);
+    fetchStructure();
+  }, [courseId]);
 
   const handleSaveTitle = async () => {
     try {
@@ -104,7 +103,7 @@ const LessonView = () => {
         { headers: { "Content-Type": "application/json" } }
       );
       setIsEditing(false);
-      setInitialContent(content); // Оновлюємо початковий контент після збереження
+      setInitialContent(content);
     } catch (error) {
       console.error("Error saving content:", error);
       alert("Не вдалося зберегти зміни контенту.");
@@ -117,192 +116,222 @@ const LessonView = () => {
   };
 
   const handleCancelContentEdit = () => {
-    setContent(initialContent); // Повертаємо початковий контент
-    setIsEditing(false); // Просто виходимо з режиму редагування без збереження змін у контенті
+    setContent(initialContent);
+    setIsEditing(false);
   };
 
   const toggleEditTitle = () => setIsEditingTitle(!isEditingTitle);
   const toggleEditContent = () => setIsEditing(!isEditing);
 
- // Функція завантаження зображення
-  const handleImageUpload = async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
+  // Конфігурація Jodit з урахуванням теми
+  const editorConfig = {
+    readonly: !isEditing,
+    theme: appTheme === "dark" ? "dark" : "default",
+    toolbarSticky: false,
+    extraButtons: [
+      {
+        name: "uploadImage",
+        iconURL:
+          "https://img.icons8.com/material-outlined/24/000000/upload.png",
+        tooltip: "Завантажити зображення",
+        exec: async () => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
 
-    input.onchange = async (event) => {
-      const file = event.target.files[0];
-      if (file && editorRef.current) {
-        const formData = new FormData();
-        formData.append("file", file);
+          input.onchange = async (event) => {
+            const file = event.target.files[0];
+            if (file && editorRef.current) {
+              const formData = new FormData();
+              formData.append("file", file);
 
-        try {
-          const response = await axios.post(
-            "http://localhost:3001/api/uploads",
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
+              try {
+                const response = await axios.post(
+                  "http://localhost:3001/api/uploads",
+                  formData,
+                  { headers: { "Content-Type": "multipart/form-data" } }
+                );
 
-          if (response.data && response.data.url) {
-            const imgTag = `<img src="${response.data.url}" alt="Зображення" />`;
-            setContent((prevContent) => prevContent + imgTag);
-          } else {
-            console.error(
-              "Невірний формат відповіді від сервера:",
-              response.data
-            );
-            alert(
-              "Не вдалося завантажити зображення: невірний формат відповіді"
-            );
-          }
-        } catch (error) {
-          console.error("Помилка завантаження зображення:", error);
-          alert("Не вдалося завантажити зображення");
-        }
-      }
-    };
+                if (response.data && response.data.url) {
+                  const imgTag = `<img src="${response.data.url}" alt="Зображення" />`;
+                  setContent((prevContent) => prevContent + imgTag);
+                } else {
+                  console.error(
+                    "Невірний формат відповіді від сервера:",
+                    response.data
+                  );
+                  alert(
+                    "Не вдалося завантажити зображення: невірний формат відповіді"
+                  );
+                }
+              } catch (error) {
+                console.error("Помилка завантаження зображення:", error);
+                alert("Не вдалося завантажити зображення");
+              }
+            }
+          };
 
-    // Відкриваємо діалог вибору файлу
-    input.click();
+          input.click();
+        },
+      },
+    ],
+    style: {
+      backgroundColor: appTheme === "dark" ? "#262626" : "#fff",
+      color: appTheme === "dark" ? "#f0f0f0" : "#000",
+    },
   };
 
-
-
-  // Конфігурація Jodit з урахуванням теми
-const editorConfig = {
-  readonly: !isEditing,
-  theme: appTheme === "dark" ? "dark" : "default",
-  toolbarSticky: false,
-  extraButtons: [
-    {
-      name: "uploadImage",
-      iconURL: "https://img.icons8.com/material-outlined/24/000000/upload.png",
-      tooltip: "Завантажити зображення",
-      exec: handleImageUpload,
-    },
-  ],
-  style: {
-    backgroundColor: appTheme === "dark" ? "#262626" : "#fff",
-    color: appTheme === "dark" ? "#f0f0f0" : "#000",
-  },
-};
-
-
-
-
   if (!lesson) {
-    return <Typography>Завантаження...</Typography>; // Відображаємо повідомлення, поки lesson не завантажено
+    return <Typography>Завантаження...</Typography>;
   }
 
-  return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
-      <Box
+return (
+  <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    {/* Фіксована секція з назвою курсу, яка залишається вгорі сторінки */}
+    <Box
+      sx={{
+        position: "fixed",
+        top: "64px",
+        left: 250,
+        right: 0,
+        padding: 2,
+        backgroundColor: "background.paper",
+        zIndex: 10,
+        borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+      }}
+    >
+      <Typography
+        variant="h5"
+        onClick={() => navigate(`/dashboard/courses/${courseId}`)}
         sx={{
-          width: "240px",
-          borderRight: (theme) => `1px solid ${theme.palette.divider}`,
-          padding: 2,
-          overflowY: "auto",
-          maxHeight: "100vh",
-          position: "fixed",
-          top: 100,
-          height: "100vh",
+          cursor: "pointer",
+          color: "primary.main",
+          "&:hover": { textDecoration: "underline" },
         }}
       >
-        <Typography variant="h6">Уроки:</Typography>
-        <List>
-          {cachedLessons.length ? (
-            cachedLessons.map((lesson) => (
-              <ListItem key={lesson._id}>
-                <ListItemButton
-                  onClick={() =>
-                    navigate(
-                      `/dashboard/courses/${courseId}/lessons/${lesson._id}`
-                    )
-                  }
-                >
-                  {lesson.title}
-                </ListItemButton>
-              </ListItem>
-            ))
-          ) : (
-            <Typography>Уроків ще немає.</Typography>
-          )}
-        </List>
-      </Box>
+        {courseTitle}
+      </Typography>
+    </Box>
 
+    {/* Ліва панель структури курсу, що містить список уроків і тестів */}
+    <Box
+      sx={{
+        width: "240px",
+        borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+        padding: 2,
+        overflowY: "auto",
+        maxHeight: "100vh",
+        position: "fixed",
+        top: 150,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+      }}
+    >
+      <Typography variant="h6">Структура:</Typography>
+      <List>
+        {structure.length > 0 ? (
+          structure.map((item) => (
+            <ListItem key={item._id}>
+              <ListItemButton
+                onClick={() =>
+                  navigate(
+                    `/dashboard/courses/${courseId}/${
+                      item.type === "lesson" ? "lessons" : "tests"
+                    }/${item._id}`
+                  )
+                }
+              >
+                {item.title} {item.type === "test" ? "(Тест)" : ""}
+              </ListItemButton>
+            </ListItem>
+          ))
+        ) : (
+          <Typography>Елементів структури ще немає.</Typography>
+        )}
+      </List>
+    </Box>
+
+    {/* Головна секція з контентом уроку, що містить назву уроку та прокручуваний контент */}
+    <Box
+      sx={{
+        flexGrow: 1,
+        overflowY: "auto",
+        marginLeft: "240px",
+        height: "100vh",
+        paddingTop: "0px", // Відступ для фіксованого заголовка курсу
+      }}
+    >
+      {/* Секція з назвою уроку, яка фіксується всередині області контенту */}
       <Box
         sx={{
-          flexGrow: 1,
-          padding: 3,
-          overflowY: "auto",
-          marginLeft: "240px",
-          height: "100vh",
+          backgroundColor: "background.paper",
+          position: "fixed", // Зафіксовано всередині області контенту
+          top: "129px", // Відступ від заголовка курсу
+          left: "504px", // Відступ зліва для відповідності з навігаційною панеллю
+          right: 0, // Розтягнення до правого краю
+          zIndex: 9,
+          display: "flex",
+          justifyContent: "space-between",
+          padding: 2,
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`, // Лінія для розділення
         }}
       >
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(`/dashboard/courses/${courseId}`)}
-          sx={{ mb: 2 }}
-        >
-          Назад до курсу
-        </Button>
-        <Typography variant="h5" gutterBottom>
-          » {courseTitle}
-        </Typography>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {isEditingTitle ? (
-              <TextField
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                variant="outlined"
-                size="small"
-                sx={{ flexGrow: 1 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSaveTitle();
-                  }
-                }}
-              />
-            ) : (
-              <Typography variant="h4">{lesson.title}</Typography>
-            )}
-            {isEditingTitle ? (
-              <>
-                <IconButton onClick={handleSaveTitle} color="primary">
-                  <SaveIcon />
-                </IconButton>
-                <IconButton onClick={handleCancelEdit} color="secondary">
-                  <CancelIcon />
-                </IconButton>
-              </>
-            ) : (
-              <IconButton onClick={toggleEditTitle}>
-                <EditIcon />
-              </IconButton>
-            )}
-          </Box>
-          {isEditing ? (
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {" "}
-              {/* Новий контейнер для вирівнювання кнопок */}
-              <Button variant="contained" onClick={handleSaveContent}>
-                Зберегти
-              </Button>
-              <Button variant="outlined" onClick={handleCancelContentEdit}>
-                Скасувати
-              </Button>
-            </Box>
+        {/* Блок із заголовком уроку та іконками для редагування */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isEditingTitle ? (
+            <TextField
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ flexGrow: 1 }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveTitle();
+              }}
+            />
           ) : (
-            <Button variant="outlined" onClick={toggleEditContent}>
-              Редагувати контент
-            </Button>
+            <Typography variant="h4">{lesson.title}</Typography>
+          )}
+          {isEditingTitle ? (
+            <>
+              <IconButton onClick={handleSaveTitle} color="primary">
+                <SaveIcon />
+              </IconButton>
+              <IconButton onClick={handleCancelEdit} color="secondary">
+                <CancelIcon />
+              </IconButton>
+            </>
+          ) : (
+            <IconButton onClick={toggleEditTitle}>
+              <EditIcon />
+            </IconButton>
           )}
         </Box>
-        <Divider sx={{ my: 2 }} />
 
+        {/* Блок із кнопками для редагування контенту уроку */}
         {isEditing ? (
-          // Відображення редактора у режимі редагування
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button variant="contained" onClick={handleSaveContent}>
+              Зберегти
+            </Button>
+            <Button variant="outlined" onClick={handleCancelContentEdit}>
+              Скасувати
+            </Button>
+          </Box>
+        ) : (
+          <Button variant="outlined" onClick={toggleEditContent}>
+            Редагувати контент
+          </Button>
+        )}
+      </Box>
+
+      {/* Прокручуваний контент уроку або редактор контенту (якщо редагується) */}
+      <Box sx={{ marginLeft: "20px", paddingTop: "70px" }}>
+        {" "}
+        {/* Відступ для компенсації фіксованої секції */}
+        {isEditing ? (
           <JoditEditor
             ref={editorRef}
             value={content}
@@ -310,12 +339,16 @@ const editorConfig = {
             onBlur={(newContent) => setContent(newContent)}
           />
         ) : (
-          // Відображення контенту як HTML, коли не редагується
           <div dangerouslySetInnerHTML={{ __html: content }} />
         )}
       </Box>
     </Box>
-  );
+  </Box>
+);
+
+
+
+
 };
 
 export default LessonView;

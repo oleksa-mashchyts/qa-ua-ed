@@ -13,9 +13,11 @@ html, body {
   overflow-x: hidden; /* Прибираємо горизонтальний скрол */
 }
 
+
 /* Кастомні стилі для скролбарів для всього додатку */
 ::-webkit-scrollbar {
   width: 8px; /* Товщина скролбара */
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
