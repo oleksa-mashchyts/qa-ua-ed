@@ -4,6 +4,13 @@ import {
   Box,
   Typography,
   Avatar,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
   Button,
   IconButton,
   Grid,
@@ -21,19 +28,22 @@ import { useAuth } from "../context/AuthContext";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
-
 const UserProfile = () => {
   const { currentUser, setCurrentUser, updateUserAvatar } = useAuth();
   const [profile, setProfile] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-    const [editedProfile, setEditedProfile] = useState({
-      name: "",
-      bio: "",
-      email: "",
-    });
-      const [hovered, setHovered] = useState(false);
-    
+  const [editedProfile, setEditedProfile] = useState({
+    name: "",
+    bio: "",
+    email: "",
+  });
+  const [hovered, setHovered] = useState(false);
+  const [skills, setSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newSkill, setNewSkill] = useState({ skillId: "", type: "" });
 
+  // Завантаження профілю користувача та початкових даних
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -41,6 +51,7 @@ const UserProfile = () => {
           `http://localhost:3000/api/users/${currentUser._id}/profile`
         );
         setProfile(response.data);
+        setSkills(response.data.skills);
         setEditedProfile({
           name: response.data.name,
           bio: response.data.bio,
@@ -51,9 +62,47 @@ const UserProfile = () => {
       }
     };
     fetchProfile();
+
+    // Завантаження активних навичок для вибору
+    const fetchSkills = async () => {
+      try {
+        const response = await axios.get("/api/skills?status=active");
+        setAllSkills(response.data);
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+      }
+    };
+    fetchSkills();
   }, [currentUser]);
 
-  // Функція для завантаження аватара
+  // Обробка вибору навички
+  const handleSkillSelect = (skillId) => {
+    const selectedSkill = allSkills.find((skill) => skill._id === skillId);
+    setNewSkill({
+      skillId: skillId,
+      type: selectedSkill ? selectedSkill.type : "",
+    });
+  };
+
+  // Додавання нової навички зі статусом "самопризначена"
+  const handleAddSkill = async () => {
+    try {
+      const response = await axios.post(
+        `/api/users/${currentUser._id}/skills`,
+        {
+          skillId: newSkill.skillId,
+          type: newSkill.type,
+          status: "self-assigned",
+        }
+      );
+      setSkills([...skills, response.data]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Помилка при додаванні навички:", error);
+    }
+  };
+
+  // Оновлення аватара користувача
   const handleAvatarUpload = async (event) => {
     const formData = new FormData();
     formData.append("file", event.target.files[0]);
@@ -70,60 +119,57 @@ const UserProfile = () => {
       const avatarUrl = uploadResponse.data.url;
 
       // Оновлення URL аватара в профілі
-      await axios.patch(`/api/users/${currentUser._id}/avatar`, { avatarUrl },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-       updateUserAvatar(avatarUrl); 
+      await axios.patch(`/api/users/${currentUser._id}/avatar`, { avatarUrl });
+      updateUserAvatar(avatarUrl);
       setProfile((prevProfile) => ({ ...prevProfile, avatar: avatarUrl }));
     } catch (error) {
       console.error("Error uploading avatar:", error);
     }
   };
 
-    const handleEditToggle = () => {
-      setIsEditing(!isEditing);
-    };
+  // Перемикач режиму редагування
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
 
-      const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditedProfile((prev) => ({ ...prev, [name]: value }));
-      };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedProfile((prev) => ({ ...prev, [name]: value }));
+  };
 
-      const handleSaveProfile = async () => {
-        try {
-          const response = await axios.patch(
-            `/api/users/${currentUser._id}/profile`,
-            {
-              name: editedProfile.name,
-              bio: editedProfile.bio,
-              email: editedProfile.email,
-            }
-          );
-          setProfile(response.data);
-          setCurrentUser((prev) => ({ ...prev, ...response.data })); // Оновлення в контексті
-          setIsEditing(false);
-        } catch (error) {
-          console.error("Error saving profile:", error);
+  // Збереження профілю користувача після редагування
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.patch(
+        `/api/users/${currentUser._id}/profile`,
+        {
+          name: editedProfile.name,
+          bio: editedProfile.bio,
+          email: editedProfile.email,
         }
-      };
+      );
+      setProfile(response.data);
+      setCurrentUser((prev) => ({ ...prev, ...response.data }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
+  };
 
-        const handleCancelEdit = () => {
-          setEditedProfile({
-            name: profile.name,
-            bio: profile.bio,
-            email: profile.email,
-          });
-          setIsEditing(false);
-        };
-
+  // Відміна редагування профілю
+  const handleCancelEdit = () => {
+    setEditedProfile({
+      name: profile.name,
+      bio: profile.bio,
+      email: profile.email,
+    });
+    setIsEditing(false);
+  };
 
   return (
     <Box sx={{ padding: 3, maxWidth: 900, margin: "auto" }}>
       {/* Шапка профілю */}
       <Paper sx={{ padding: 3, display: "flex", alignItems: "center", gap: 2 }}>
-        {/* Аватар з кнопкою завантаження, яка показується при наведенні */}
         <Box
           sx={{
             position: "relative",
@@ -253,6 +299,66 @@ const UserProfile = () => {
         )}
       </Paper>
 
+      {/* Відображення та додавання навичок */}
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6">Навички</Typography>
+        {skills.map((skill) => (
+          <Chip
+            key={skill._id}
+            label={skill.skillId.name || "Навичка"} // Відображення назви навички
+            sx={{
+              backgroundColor:
+                skill.status === "self-assigned"
+                  ? "blue"
+                  : skill.status === "confirmed"
+                  ? "green"
+                  : "lightcoral",
+              color: "white",
+              margin: "5px",
+            }}
+          />
+        ))}
+        <Button
+          variant="outlined"
+          onClick={() => setIsDialogOpen(true)}
+          sx={{ mt: 1 }}
+        >
+          Додати навичку
+        </Button>
+      </Box>
+
+      {/* Діалогове вікно для додавання навички */}
+      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+        <DialogTitle>Додати навичку</DialogTitle>
+        <DialogContent>
+          <Select
+            value={newSkill.skillId}
+            onChange={(e) => handleSkillSelect(e.target.value)}
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            {allSkills.map((skill) => {
+              const isAdded = skills.some((s) => s.skillId._id === skill._id);
+              return (
+                <MenuItem key={skill._id} value={skill._id} disabled={isAdded}>
+                  {isAdded ? `(додано) ${skill.name}` : skill.name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDialogOpen(false)}>Скасувати</Button>
+          <Button
+            variant="contained"
+            onClick={handleAddSkill}
+            disabled={!newSkill.skillId}
+          >
+            Додати
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Досягнення та бейджі */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
@@ -291,8 +397,9 @@ const UserProfile = () => {
         <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
           Натисніть для експорту у формат PDF
         </Typography>
-        {/* Додайте кнопку для експорту CV */}
       </Paper>
+
+      <Divider sx={{ my: 3 }} />
     </Box>
   );
 };

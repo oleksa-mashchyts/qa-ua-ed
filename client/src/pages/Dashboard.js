@@ -46,6 +46,7 @@ const Dashboard = () => {
     { name: "Студенти", path: "students", icon: <PeopleIcon /> },
     { name: "Вчителі", path: "teachers", icon: <PeopleIcon /> },
     { name: "Запитання", path: "questions", icon: <HelpIcon /> },
+    { name: "Навички", path: "skills", icon: <BarChartIcon /> },
     { name: "Статистика", path: "statistics", icon: <BarChartIcon /> },
     { name: "Налаштування", path: "settings", icon: <SettingsIcon /> },
   ];
@@ -56,7 +57,16 @@ const Dashboard = () => {
     { name: "Завдання", path: "tasks", icon: <BarChartIcon /> },
   ];
 
-  const pages = currentUser?.role === "admin" ? adminPages : teacherPages;
+  const studentPages = [
+    { name: "Головна", path: "home", icon: <HomeIcon /> },
+    { name: "Курси", path: "courses", icon: <SchoolIcon /> },
+    { name: "Мої курси", path: "my-courses", icon: <SchoolIcon /> },
+    { name: "Вчителі", path: "teachers", icon: <PeopleIcon /> },
+    { name: "Запитання", path: "questions", icon: <HelpIcon /> },
+    { name: "Налаштування", path: "settings", icon: <SettingsIcon /> },
+  ];
+
+   const pages = currentUser?.role === "student" ? studentPages : adminPages;
 
 return (
   <Box sx={{ display: "flex" }}>
@@ -94,7 +104,7 @@ return (
       >
         <Typography variant="h6" noWrap sx={{ marginLeft: 1 }}>
           {isDrawerOpen &&
-            `Панель ${currentUser?.role === "admin" ? "Адміна" : "Вчителя"}`}
+            `Панель ${currentUser?.role === "admin" ? "Адміна" : "Студента"}`}
         </Typography>
 
         <IconButton

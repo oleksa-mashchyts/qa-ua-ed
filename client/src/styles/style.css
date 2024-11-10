@@ -141,6 +141,23 @@ input {
   box-shadow: 0px 0px 10px 6px rgba(0, 34, 255, 0.4); /* Синя підсвітка */
 }
 
+/* Стилі для статусів навичок */
+.skill-chip.self-assigned {
+  background-color: blue;
+  color: white;
+}
+
+.skill-chip.confirmed {
+  background-color: green;
+  color: white;
+}
+
+.skill-chip.pending {
+  background-color: lightcoral;
+  color: white;
+}
+
+
 #toolbar {
   display: flex;
   gap: 10px;

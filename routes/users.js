@@ -26,20 +26,38 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Отримати профіль користувача з новими полями
-router.get("/:id/profile", getUser, (req, res) => {
-  res.json({
-    name: res.user.name,
-    email: res.user.email,
-    bio: res.user.bio,
-    skills: res.user.skills,
-    certifications: res.user.certifications,
-    achievements: res.user.achievements,
-    roadmap: res.user.roadmap,
-    cv: res.user.cv,
-    avatar: res.user.avatar,
-  });
+// Отримати профіль користувача з новими полями та заповненням навичок
+router.get("/:id/profile", getUser, async (req, res) => {
+  try {
+    // Зберігаємо всю логіку для наявних полів, але додаємо заповнення для навичок
+    const user = await User.findById(req.params.id)
+      .populate({
+        path: "skills.skillId",
+        model: "Skill",
+        select: "name type", // Вибірково заповнюємо лише назву та тип навички
+      });
+
+    if (!user) {
+      return res.status(404).json({ message: "Користувача не знайдено" });
+    }
+
+    // Формуємо об'єкт для відповіді, включаючи всі наявні поля
+    res.json({
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      skills: user.skills, // Тепер skills включає навички з назвою та типом
+      certifications: user.certifications,
+      achievements: user.achievements,
+      roadmap: user.roadmap,
+      cv: user.cv,
+      avatar: user.avatar,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Помилка при завантаженні профілю" });
+  }
 });
+
 
 // Оновити профіль користувача
 router.patch("/:id/profile", getUser, async (req, res) => {
@@ -115,8 +133,6 @@ router.patch("/:id/theme", async (req, res) => {
 });
 
   router.patch("/:id/avatar", getUser, async (req, res) => {
-    console.log("Запит отримано");
-    console.log("PATCH request received for avatar update:", req.params.id);
     try {
       const { avatarUrl } = req.body;
       res.user.avatar = avatarUrl;
@@ -128,7 +144,39 @@ router.patch("/:id/theme", async (req, res) => {
   });
 
 
+// Отримати призначені курси студента
+router.get("/:id/assigned-courses", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate("assignedCourses");
+    if (!user) {
+      return res.status(404).json({ message: "Користувача не знайдено" });
+    }
+    res.json(user.assignedCourses);
+  } catch (error) {
+    console.error("Помилка при завантаженні призначених курсів:", error);
+    res
+      .status(500)
+      .json({ message: "Помилка при завантаженні призначених курсів" });
+  }
+});
 
+
+
+
+router.patch("/:id/assign-courses", getUser, async (req, res) => {
+  const { courseIds } = req.body; // Отримуємо масив ID курсів
+  if (!Array.isArray(courseIds)) {
+    return res.status(400).json({ message: "Invalid data format" });
+  }
+
+  try {
+    res.user.assignedCourses = courseIds; // Призначаємо курси
+    const updatedUser = await res.user.save();
+    res.json({ assignedCourses: updatedUser.assignedCourses });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 
@@ -313,6 +361,88 @@ router.get("/count/teachers", async (req, res) => {
   try {
     const teacherCount = await User.countDocuments({ role: "teacher" });
     res.json({ count: teacherCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/skills", async (req, res) => {
+  const { name, type, status } = req.body;
+  const newSkill = { name, type, status, createdAt: new Date() };
+  try {
+    const user = await User.findById(req.user._id); // Припущення, що є авторизація
+    user.skills.push(newSkill);
+    await user.save();
+    res.status(201).json(newSkill);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Отримати навички студента з назвою та типом навичок
+router.get("/:id/skills", getUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate({
+      path: "skills.skillId",
+      model: "Skill",
+      select: "name type",
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Користувача не знайдено" });
+    }
+
+    res.json(user.skills); // Повертаємо масив навичок з деталями
+  } catch (error) {
+    res.status(500).json({ message: "Помилка при завантаженні навичок студента" });
+  }
+});
+
+
+// Додати навичку користувачеві
+router.post("/:id/skills", getUser, async (req, res) => {
+  const { skillId, type, status } = req.body;
+
+  try {
+    const skill = { skillId, type, status }; // Об'єкт навички для додавання
+    res.user.skills.push(skill); // Додаємо навичку до списку користувача
+    await res.user.save();
+    res.status(201).json(skill);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка при додаванні навички користувачеві" });
+  }
+});
+
+// Оновлення статусу навички користувача
+router.patch("/:id/skills/:skillId", getUser, async (req, res) => {
+  const { status } = req.body; // Отримуємо новий статус з тіла запиту
+
+  try {
+    // Знаходимо навичку за її ID в масиві навичок користувача
+    const skill = res.user.skills.id(req.params.skillId);
+
+    if (!skill) {
+      return res.status(404).json({ message: "Навичку не знайдено" });
+    }
+
+    skill.status = status; // Оновлюємо статус навички
+    await res.user.save(); // Зберігаємо зміни користувача
+
+    res.json(skill); // Відправляємо оновлену навичку у відповідь
+  } catch (error) {
+    res.status(500).json({ message: "Помилка при оновленні навички" });
+  }
+});
+
+
+
+// Видалити навичку
+router.delete("/skills/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id); // Припущення, що є авторизація
+    user.skills = user.skills.filter((skill) => skill._id.toString() !== req.params.id);
+    await user.save();
+    res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -7,6 +7,7 @@ require('dotenv').config(); // Для використання змінних с
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./src/docs/swaggerDocs');
 
+
 const app = express();
 
 // Додаємо налаштування для підтримки більших файлів
@@ -51,7 +52,7 @@ const lessonsRouter = require('./routes/lessons');
 const testsRouter = require('./routes/tests');
 const userRouter = require('./routes/users');
 const courseElementsRouter = require("./routes/courseElements");
-
+const skillsRouter = require("./routes/skills");
 
 
 app.use('/api/auth', authRouter);
@@ -60,6 +61,7 @@ app.use('/api/lessons', lessonsRouter);
 app.use('/api/tests', testsRouter);
 app.use('/api/users', userRouter);
 app.use("/api", courseElementsRouter);
+app.use("/api/skills", skillsRouter);
 
 
 // Налаштування маршруту для кореневого ендпоінту

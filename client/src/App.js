@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, CssBaseline, Typography, Box } from '@mui/material';
+import React, { useEffect } from 'react';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { lightTheme, darkTheme } from './theme';
 import Header from './components/Header';
@@ -18,6 +18,8 @@ import Main from "./pages/Main";
 import Settings from "./pages/Settings";
 import RoadmapView from "./components/RoadmapView";
 import CVView from "./components/CVView";
+import StudentCourses from "./pages/StudentCourses"; 
+import Skills from './pages/Skills';
 
 
 const App = () => {
@@ -26,11 +28,16 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log("Current User:", currentUser); // Лог для перевірки користувача
     if (!isLoading && currentUser && location.pathname === "/") {
-      navigate("/dashboard");
+      if (currentUser.role === "student") {
+        console.log("Navigating student to dashboard home");
+        navigate("/dashboard/home"); // Для студента — дашборд з домашньою сторінкою
+      } else {
+        console.log("Navigating admin to dashboard");
+        navigate("/dashboard"); // Для адміна — загальний дашборд
+      }
     }
-  }, [isLoading, currentUser, location.pathname, navigate]);
+  }, [isLoading, currentUser, navigate]);
 
   const handleToggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -38,7 +45,6 @@ const App = () => {
   };
 
   const appliedTheme = theme === "dark" ? darkTheme : lightTheme;
-
 
   return (
     <ThemeProvider theme={appliedTheme}>
@@ -48,40 +54,65 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          <Route
-            path="/dashboard/*"
-            element={
-              <ProtectedRoute role="admin">
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="home" />} />
-            <Route path="home" element={<Main />} />{" "}
-            {/* Відображення Main.js */}
-            <Route path="courses" element={<Courses />} />
-            <Route path="students" element={<Students />} />
-            <Route path="teachers" element={<Teachers />} />
-            <Route path="settings" element={<Settings />} />
+          {/* Для студентів — маршрут без ролі admin */}
+          {currentUser?.role === "student" && (
             <Route
-              path="courses/:courseId/lessons/:lessonId"
-              element={<LessonView />}
-            />
+              path="/dashboard/*"
+              element={
+                <ProtectedRoute role="student">
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="home" />} />
+              <Route path="home" element={<Main />} />
+              <Route path="courses" element={<Courses />} />
+              <Route path="my-courses" element={<StudentCourses />} />
+              <Route path="teachers" element={<Teachers />} />
+              <Route
+                path="questions"
+                element={<div>Questions for Students</div>}
+              />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          )}
+
+          {/* Для адмінів — маршрут із роллю admin */}
+          {currentUser?.role === "admin" && (
             <Route
-              path="courses/:courseId/tests/:testId"
-              element={<TestView />}
-            />
-            {/* Новий маршрут для сторінки деталей курсу */}
-            <Route path="courses/:courseId" element={<CourseDetails />} />
-          </Route>
-          {/* Редирект на дашборд або головну залежно від авторизації */}
+              path="/dashboard/*"
+              element={
+                <ProtectedRoute role="admin">
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="home" />} />
+              <Route path="home" element={<Main />} />
+              <Route path="courses" element={<Courses />} />
+              <Route path="students" element={<Students />} />
+              <Route path="teachers" element={<Teachers />} />
+              <Route path="skills" element={<Skills />} />
+              <Route path="settings" element={<Settings />} />
+              <Route
+                path="courses/:courseId/lessons/:lessonId"
+                element={<LessonView />}
+              />
+              <Route
+                path="courses/:courseId/tests/:testId"
+                element={<TestView />}
+              />
+              <Route path="courses/:courseId" element={<CourseDetails />} />
+            </Route>
+          )}
+
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile/roadmap" element={<RoadmapView />} />
+          <Route path="/profile/cv" element={<CVView />} />
           <Route
             path="*"
             element={<Navigate to={currentUser ? "/dashboard" : "/"} />}
           />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/profile/roadmap" element={<RoadmapView />} />
-          <Route path="/profile/cv" element={<CVView />} />
         </Routes>
       </Box>
     </ThemeProvider>

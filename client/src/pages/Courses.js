@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
+import StudentCourseList from "../components/StudentAllCoursesList";
 import { useAuth } from '../context/AuthContext';
 import CustomButton from '../components/CustomButton';
 import { 
@@ -145,18 +146,22 @@ const Courses = () => {
       <Typography variant="h4" gutterBottom>
         Список курсів
       </Typography>
-      <CustomButton onClick={() => handleOpen()} sx={{ mb: 2 }}>
-        Додати курс
-      </CustomButton>
-
-      <CourseList
-        courses={courses}
-        onDelete={handleOpenConfirm}
-        onEdit={handleOpen}
-        onEnter={handleEnterCourse}
-        onUpdateCourseImage={handleUpdateCourseImage} // Передаємо функцію для оновлення зображення
-      />
-
+      {currentUser?.role === "admin" && (
+        <CustomButton onClick={() => handleOpen()} sx={{ mb: 2 }}>
+          Додати курс
+        </CustomButton>
+      )}
+      {currentUser?.role === "admin" ? (
+        <CourseList
+          courses={courses}
+          onDelete={handleOpenConfirm}
+          onEdit={handleOpen}
+          onEnter={handleEnterCourse}
+          onUpdateCourseImage={handleUpdateCourseImage} // Передаємо функцію для оновлення зображення
+        />
+      ) : (
+        <StudentCourseList courses={courses} />
+      )}
       <CustomModal
         open={open}
         onClose={handleClose}
