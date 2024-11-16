@@ -20,6 +20,8 @@ import RoadmapView from "./components/RoadmapView";
 import CVView from "./components/CVView";
 import StudentCourses from "./pages/StudentCourses"; 
 import Skills from './pages/Skills';
+import StudentCourseDetails from "./pages/StudentCourseDetails";
+
 
 
 const App = () => {
@@ -68,6 +70,10 @@ const App = () => {
               <Route path="home" element={<Main />} />
               <Route path="courses" element={<Courses />} />
               <Route path="my-courses" element={<StudentCourses />} />
+              <Route
+                path="courses/:courseId"
+                element={<StudentCourseDetails />}
+              />
               <Route path="teachers" element={<Teachers />} />
               <Route
                 path="questions"

@@ -1,9 +1,12 @@
 // StudentCourseList.js
 import React from "react";
-import { Card, CardContent, Typography, CardActions, Box, IconButton, CardMedia } from "@mui/material";
+import { Card, CardContent, Typography, CardActions, Box, IconButton, Button, CardMedia } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useNavigate } from "react-router-dom";
 
 const StudentCourseList = ({ courses }) => {
+  const navigate = useNavigate();
+
   if (courses.length === 0) {
     return <Typography variant="h6">Курси відсутні.</Typography>;
   }
@@ -15,7 +18,10 @@ const StudentCourseList = ({ courses }) => {
           <CardMedia
             component="img"
             height="140"
-            image={course.imageUrl || "https://mui.com/static/images/cards/contemplative-reptile.jpg"}
+            image={
+              course.imageUrl ||
+              "https://mui.com/static/images/cards/contemplative-reptile.jpg"
+            }
             alt={course.title}
           />
           <CardContent>
@@ -28,15 +34,19 @@ const StudentCourseList = ({ courses }) => {
             <Typography variant="body2">{course.description}</Typography>
           </CardContent>
           <CardActions>
-            <IconButton color="default" onClick={() => console.log("Enter course clicked")}>
-              <ArrowForwardIcon />
-            </IconButton>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/dashboard/courses/${course._id}`)}
+            >
+              Увійти до курсу
+            </Button>
           </CardActions>
         </Card>
       ))}
     </Box>
   );
 };
+
 
 export default StudentCourseList;
 
