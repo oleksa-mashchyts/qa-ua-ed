@@ -143,53 +143,58 @@ const Skills = () => {
         Додати навичку
       </Button>
 
-      <TableContainer component={Paper} sx={{ mt: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Назва</TableCell>
-              <TableCell>Тип</TableCell>
-              <TableCell>Статус</TableCell>
-              <TableCell>Дата створення</TableCell>
-              <TableCell align="right">Дії</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredSkills.map((skill) => (
-              <TableRow key={skill._id}>
-                <TableCell>{skill.name}</TableCell>
-                <TableCell>
-                  {skill.type === "hard" ? "Hard Skill" : "Soft Skill"}
-                </TableCell>
-                <TableCell>{skill.status}</TableCell>
-                <TableCell>
-                  {format(new Date(skill.createdAt), "dd/MM/yyyy")}
-                </TableCell>
-                <TableCell align="right">
-                  <IconButton onClick={(e) => handleMenuOpen(e, skill)}>
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
-                  >
-                    <MenuItem onClick={() => handleDialogOpen(selectedSkill)}>
-                      Редагувати
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteSkill(selectedSkill._id)}
-                    >
-                      Видалити
-                    </MenuItem>
-                  </Menu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
+      <Box sx={{ maxWidth: 1600, margin: "auto", mt: 3 }}>
+        <Paper>
+    
+            <Table>
+              <TableHead className="table-header">
+                <TableRow>
+                  <TableCell>Назва</TableCell>
+                  <TableCell>Тип</TableCell>
+                  <TableCell>Статус</TableCell>
+                  <TableCell>Дата створення</TableCell>
+                  <TableCell align="right">Дії</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredSkills.map((skill) => (
+                  <TableRow key={skill._id}>
+                    <TableCell>{skill.name}</TableCell>
+                    <TableCell>
+                      {skill.type === "hard" ? "Hard Skill" : "Soft Skill"}
+                    </TableCell>
+                    <TableCell>{skill.status}</TableCell>
+                    <TableCell>
+                      {format(new Date(skill.createdAt), "dd/MM/yyyy")}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton onClick={(e) => handleMenuOpen(e, skill)}>
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                      >
+                        <MenuItem
+                          onClick={() => handleDialogOpen(selectedSkill)}
+                        >
+                          Редагувати
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => handleDeleteSkill(selectedSkill._id)}
+                        >
+                          Видалити
+                        </MenuItem>
+                      </Menu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+       
+        </Paper>
+      </Box>
       {/* Діалогове вікно для додавання/редагування навички */}
       <Dialog open={isDialogOpen} onClose={handleDialogClose}>
         <DialogTitle>

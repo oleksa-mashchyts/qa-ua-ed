@@ -25,7 +25,7 @@ const StudentCourses = () => {
   return (
     <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>
-        Мої курси
+        Моє навчання
       </Typography>
       <StudentCourseList courses={assignedCourses} />
     </Box>

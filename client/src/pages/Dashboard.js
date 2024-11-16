@@ -58,10 +58,9 @@ const Dashboard = () => {
   ];
 
   const studentPages = [
-    { name: "Головна", path: "home", icon: <HomeIcon /> },
-    { name: "Курси", path: "courses", icon: <SchoolIcon /> },
-    { name: "Мої курси", path: "my-courses", icon: <SchoolIcon /> },
-    { name: "Вчителі", path: "teachers", icon: <PeopleIcon /> },
+    { name: "Домашня", path: "home", icon: <HomeIcon /> },
+    { name: "Матеріяли", path: "courses", icon: <SchoolIcon /> },
+    { name: "Моє навчання", path: "my-courses", icon: <SchoolIcon /> },
     { name: "Запитання", path: "questions", icon: <HelpIcon /> },
     { name: "Налаштування", path: "settings", icon: <SettingsIcon /> },
   ];
@@ -104,7 +103,8 @@ return (
       >
         <Typography variant="h6" noWrap sx={{ marginLeft: 1 }}>
           {isDrawerOpen &&
-            `Панель ${currentUser?.role === "admin" ? "Адміна" : "Студента"}`}
+            currentUser?.role !== "student" &&
+            `Панель ${currentUser?.role === "admin" ? "Адміна" : "Вчителя"}`}
         </Typography>
 
         <IconButton

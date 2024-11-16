@@ -30,14 +30,40 @@ router.get("/count", async (req, res) => {
  *                 $ref: '#/components/schemas/Course'
  */
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
+  const { duration, level } = req.query;
+
+  const filter = {};
+
+  // Фільтрація за тривалістю
+  if (duration) {
+    try {
+      const durations = JSON.parse(duration); // Очікуємо масив числових діапазонів
+      if (durations.length === 2) {
+        filter.duration = { $gte: durations[0], $lt: durations[1] }; // Мінімум і максимум
+      }
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Invalid duration filter format" });
+    }
+  }
+
+  // Фільтрація за рівнем
+  if (level) {
+    const levels = level.split(",");
+    filter.level = { $in: levels };
+  }
+
   try {
-    const courses = await Course.find();
+    const courses = await Course.find(filter);
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+
 
 // Додавання нового курсу
 /**

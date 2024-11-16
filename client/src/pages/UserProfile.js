@@ -25,10 +25,13 @@ import { PhotoCamera, Cancel as CancelIcon } from "@mui/icons-material";
 import Achievements from "../components/Achievements";
 import Badges from "../components/Badges";
 import { useAuth } from "../context/AuthContext";
+import { Add, Close } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
 const UserProfile = () => {
+  const theme = useTheme();
   const { currentUser, setCurrentUser, updateUserAvatar } = useAuth();
   const [profile, setProfile] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -42,6 +45,8 @@ const UserProfile = () => {
   const [allSkills, setAllSkills] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({ skillId: "", type: "" });
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [initialSkills, setInitialSkills] = useState([]);
 
   // Завантаження профілю користувача та початкових даних
   useEffect(() => {
@@ -52,6 +57,7 @@ const UserProfile = () => {
         );
         setProfile(response.data);
         setSkills(response.data.skills);
+        setInitialSkills(response.data.skills); // Зберігаємо початкові навички
         setEditedProfile({
           name: response.data.name,
           bio: response.data.bio,
@@ -85,23 +91,29 @@ const UserProfile = () => {
   };
 
   // Додавання нової навички зі статусом "самопризначена"
-  const handleAddSkill = async () => {
-    try {
-      const response = await axios.post(
-        `/api/users/${currentUser._id}/skills`,
-        {
-          skillId: newSkill.skillId,
-          type: newSkill.type,
-          status: "self-assigned",
-        }
-      );
-      setSkills([...skills, response.data]);
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Помилка при додаванні навички:", error);
-    }
-  };
+const handleAddSkill = async () => {
+  try {
+    const response = await axios.post(`/api/users/${currentUser._id}/skills`, {
+      skillId: newSkill.skillId,
+      type: newSkill.type,
+      status: "self-assigned",
+    });
 
+    // Знайти повний об'єкт навички з `allSkills` за її ID
+    const addedSkill = allSkills.find(
+      (skill) => skill._id === newSkill.skillId
+    );
+
+    // Додати повний об'єкт навички (з назвою) в стан `skills`
+    setSkills([...skills, { ...response.data, skillId: addedSkill }]);
+
+    setIsDialogOpen(false);
+  } catch (error) {
+    console.error("Помилка при додаванні навички:", error);
+  }
+};
+
+  
   // Оновлення аватара користувача
   const handleAvatarUpload = async (event) => {
     const formData = new FormData();
@@ -156,6 +168,20 @@ const UserProfile = () => {
     }
   };
 
+    const handleDeleteSkill = (skillId) => {
+      setSkills(skills.filter((skill) => skill.skillId._id !== skillId));
+    };
+
+    const handleSaveSkills = async () => {
+      try {
+        await axios.patch(`/api/users/${currentUser._id}/profile`, { skills });
+        setInitialSkills(skills); // Оновлюємо початковий стан після збереження
+        setIsEditingSkills(false);
+      } catch (error) {
+        console.error("Error saving skills:", error);
+      }
+    };
+
   // Відміна редагування профілю
   const handleCancelEdit = () => {
     setEditedProfile({
@@ -166,8 +192,13 @@ const UserProfile = () => {
     setIsEditing(false);
   };
 
+    const handleCancelSkillsEdit = () => {
+      setSkills(initialSkills); // Відновлюємо початковий стан навичок
+      setIsEditingSkills(false);
+    };
+
   return (
-    <Box sx={{ padding: 3, maxWidth: 900, margin: "auto" }}>
+    <Box sx={{ padding: 3, maxWidth: 900, margin: "auto", mt: 10 }}>
       {/* Шапка профілю */}
       <Paper sx={{ padding: 3, display: "flex", alignItems: "center", gap: 2 }}>
         <Box
@@ -302,29 +333,70 @@ const UserProfile = () => {
       {/* Відображення та додавання навичок */}
       <Box sx={{ mt: 3 }}>
         <Typography variant="h6">Навички</Typography>
-        {skills.map((skill) => (
-          <Chip
-            key={skill._id}
-            label={skill.skillId.name || "Навичка"} // Відображення назви навички
-            sx={{
-              backgroundColor:
-                skill.status === "self-assigned"
-                  ? "blue"
-                  : skill.status === "confirmed"
-                  ? "green"
-                  : "lightcoral",
-              color: "white",
-              margin: "5px",
-            }}
-          />
-        ))}
-        <Button
-          variant="outlined"
-          onClick={() => setIsDialogOpen(true)}
-          sx={{ mt: 1 }}
-        >
-          Додати навичку
-        </Button>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+          {skills.map((skill) => (
+            <Chip
+              key={skill._id}
+              label={skill.skillId.name}
+              onDelete={
+                isEditingSkills
+                  ? () => handleDeleteSkill(skill.skillId._id)
+                  : undefined
+              }
+              deleteIcon={isEditingSkills ? <Close /> : undefined}
+              sx={{
+                backgroundColor:
+                  skill.status === "self-assigned"
+                    ? theme.palette.info.light
+                    : skill.status === "confirmed"
+                    ? theme.palette.success.light
+                    : theme.palette.warning.light,
+                color: theme.palette.getContrastText(
+                  skill.status === "self-assigned"
+                    ? theme.palette.info.light
+                    : skill.status === "confirmed"
+                    ? theme.palette.success.light
+                    : theme.palette.warning.light
+                ),
+                cursor: isEditingSkills ? "pointer" : "default",
+              }}
+            />
+          ))}
+          {isEditingSkills && (
+            <Chip
+              label="+"
+              onClick={() => setIsDialogOpen(true)}
+              sx={{
+                backgroundColor: "#e0e0e0",
+                color: "black",
+                cursor: "pointer",
+              }}
+            />
+          )}
+        </Box>
+        {isEditingSkills ? (
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSaveSkills}
+              sx={{ mr: 1 }}
+            >
+              Зберегти
+            </Button>
+            <Button variant="outlined" onClick={handleCancelSkillsEdit}>
+              Відміна
+            </Button>
+          </Box>
+        ) : (
+          <Button
+            variant="outlined"
+            onClick={() => setIsEditingSkills(true)}
+            sx={{ mt: 1 }}
+          >
+            Редагувати
+          </Button>
+        )}
       </Box>
 
       {/* Діалогове вікно для додавання навички */}
@@ -346,6 +418,15 @@ const UserProfile = () => {
               );
             })}
           </Select>
+
+          {/* Поле для відображення типу навички */}
+          <TextField
+            label="Тип навички"
+            value={newSkill.type === "hard" ? "Hard Skill" : "Soft Skill"}
+            fullWidth
+            sx={{ mt: 2 }}
+            InputProps={{ readOnly: true }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Скасувати</Button>

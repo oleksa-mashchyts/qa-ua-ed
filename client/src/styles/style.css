@@ -4,6 +4,8 @@ body {
   background-color: #f7f7f7;
   color: #333;
   line-height: 1.6;
+    display: flex;
+  flex-direction: column; 
 }
 
 html, body {
@@ -17,7 +19,7 @@ html, body {
 /* Кастомні стилі для скролбарів для всього додатку */
 ::-webkit-scrollbar {
   width: 8px; /* Товщина скролбара */
-  display: none;
+  display: auto;
 }
 
 ::-webkit-scrollbar-track {
@@ -170,4 +172,54 @@ input {
 
 #toolbar button, #toolbar select {
   cursor: pointer;
+}
+
+/* Додаємо ефект прилипання для шапки таблиці */
+.table-header {
+  position: sticky;
+  top: 64px;
+
+  z-index: 1; /* Щоб шапка залишалась поверх контенту */
+}
+
+.filters-panel {
+  width: 280px;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--filter-bg, #f7f7f7);
+  color: var(--filter-color, #333);
+  overflow-y: auto; /* Прокрутка */
+  flex-shrink: 0; /* Забороняє зміну ширини */
+  display: flex; /* Для правильного розташування */
+  flex-direction: column; /* Розташування в стовпчик */
+  max-height: fit-content; /* Висота обмежена контекстом */
+  justify-content: space-between; /* Лічильник у нижній частині */
+  height: 100%; /* Займає всю висоту */
+}
+
+.filters-panel .results-counter {
+  text-align: center;
+  padding: 16px;
+  background-color: var(--filter-footer-bg, #e0e0e0); /* Колір залежить від теми */
+  border-radius: 8px;
+  font-weight: bold;
+  margin-top: 16px;
+}
+
+.filters-panel h6,
+.filters-panel .MuiTypography-subtitle1 {
+  white-space: nowrap; /* Запобігає збільшенню ширини через довгі заголовки */
+  overflow: hidden; /* Обрізає текст */
+  text-overflow: ellipsis; /* Додає три крапки для довгого тексту */
+}
+
+.filters-panel .MuiFormControlLabel-root {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.filters-panel .MuiButton-root {
+  margin-top: 16px;
 }

@@ -30,6 +30,11 @@ const courseSchema = new mongoose.Schema({
       message: 'Duration must be a positive integer.',
     },*/
   },
+  level: {
+    type: String,
+    enum: ["novice", "intermediate", "advanced", "expert", "not defined"], // Доступні рівні
+    default: "not defined",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -37,7 +42,7 @@ const courseSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
     default: "", // Початкове значення порожнє
-  }, 
+  },
   lessons: [
     {
       type: mongoose.Schema.Types.ObjectId,

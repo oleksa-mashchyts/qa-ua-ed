@@ -45,7 +45,7 @@ const Header = ({ toggleTheme, isDarkMode }) => {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar position="fixed">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>

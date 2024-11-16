@@ -39,17 +39,26 @@ export const lightTheme = createTheme({
     primary: {
       main: "#1976d2",
     },
-    divider: "#e0e0e0", // Колір для світлої теми
+    divider: "#e0e0e0",
+    background: {
+      paper: "#ffffff",
+      header: "#f5f5f5", // Колір для шапки таблиці у світлій темі
+    },
   },
   components: {
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#f5f5f5", // Можна використовувати 'palette.background.header'
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          "--scrollbar-track": "#FFFFFF", // Колір треку скролбара для світлої теми
-          "--scrollbar-thumb": "#b0b0b0", // Колір скролбара
-          "--scrollbar-thumb-hover": "#909090", // Колір скролбара при наведенні
-
-          /* Стилі для скролбара */
+          "--scrollbar-track": "#FFFFFF",
+          "--scrollbar-thumb": "#b0b0b0",
+          "--scrollbar-thumb-hover": "#909090",
           "&::-webkit-scrollbar": {
             width: "8px",
             backgroundColor: "transparent",
@@ -67,6 +76,14 @@ export const lightTheme = createTheme({
         },
       },
     },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.15)", // Менша тінь
+          borderRadius: 8, // Згладжені краї
+        },
+      },
+    },
   },
 });
 
@@ -74,24 +91,33 @@ export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#90caf9", // Основний колір кнопки
-      contrastText: "#fff", // Колір тексту на кнопці
+      main: "#90caf9",
+      contrastText: "#fff",
       fontWeight: 600,
     },
-    divider: "#424242", // Колір для темної теми
+    divider: "#424242",
+    background: {
+      paper: "#121212",
+      header: "#333333", // Колір для шапки таблиці у темній темі
+    },
     text: {
-      primary: "#ffffff", // Основний колір тексту білим
+      primary: "#ffffff",
     },
   },
   components: {
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#333333", // Використання кольору для темної теми
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          "--scrollbar-track": "#121212", // Колір треку скролбара для темної теми
-          "--scrollbar-thumb": "#777", // Колір скролбара
-          "--scrollbar-thumb-hover": "#999", // Колір скролбара при наведенні
-
-          /* Стилі для скролбара */
+          "--scrollbar-track": "#121212",
+          "--scrollbar-thumb": "#777",
+          "--scrollbar-thumb-hover": "#999",
           "&::-webkit-scrollbar": {
             width: "8px",
             backgroundColor: "transparent",
@@ -113,16 +139,24 @@ export const darkTheme = createTheme({
       styleOverrides: {
         containedPrimary: {
           "&:hover": {
-            backgroundColor: "#64b5f6", // Колір при наведенні для темної теми
+            backgroundColor: "#64b5f6",
           },
         },
         outlined: {
-          borderColor: "#90caf9", // Колір рамки
-          color: "#90caf9", // Колір тексту
+          borderColor: "#90caf9",
+          color: "#90caf9",
           "&:hover": {
-            backgroundColor: "rgba(144, 202, 249, 0.1)", // Колір фону при наведенні
-            borderColor: "#64b5f6", // Колір рамки при наведенні
+            backgroundColor: "rgba(144, 202, 249, 0.1)",
+            borderColor: "#64b5f6",
           },
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.15)", // Менша, м’якша тінь
+          borderRadius: 8, // Згладжені краї
         },
       },
     },
