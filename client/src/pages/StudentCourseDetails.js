@@ -6,14 +6,16 @@ import {
   Typography,
   Button,
   Card,
-  CardContent,
   CardMedia,
   CircularProgress,
+  Divider,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const StudentCourseDetails = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,13 +23,11 @@ const StudentCourseDetails = () => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        console.log("Fetching course details for ID:", courseId);
         const response = await axios.get(
           `http://localhost:3000/api/courses/${courseId}`
         );
         setCourse(response.data);
       } catch (error) {
-        console.error("Error fetching course details:", error);
         setError("Курс не знайдено");
       } finally {
         setLoading(false);
@@ -62,48 +62,107 @@ const StudentCourseDetails = () => {
     );
   }
 
+  const sectionTitleStyle = {
+    color: theme.palette.text.primary,
+    marginBottom: "16px",
+  };
+
+
   return (
-    <Box sx={{ padding: 2, maxWidth: 800, margin: "auto" }}>
-      <Card>
-        <CardMedia
-          component="img"
-          height="300"
-          image={
-            course.imageUrl ||
-            "https://mui.com/static/images/cards/contemplative-reptile.jpg"
-          }
-          alt={course.title}
-        />
-        <CardContent>
-          <Typography variant="h4" gutterBottom>
+    <Box
+      className="course-details-container"
+      sx={{
+        padding: 4,
+        backgroundColor: theme.palette.background.default, // Використовуємо тему
+        color: theme.palette.text.primary, // Використовуємо текст із теми
+      }}
+    >
+      {/* Загальна інформація про курс */}
+      <Box sx={{ display: "flex", gap: 4, mb: 4 }}>
+        <Card>
+          <CardMedia
+            className="course-image"
+            component="img"
+            sx={{
+              width: "100%",
+              objectFit: "cover",
+            }}
+            image={course.imageUrl || "https://via.placeholder.com/300"}
+            alt={course.title}
+          />
+        </Card>
+        <Box>
+          <Typography variant="h4" sx={sectionTitleStyle}>
             {course.title}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+          <Typography
+            variant="subtitle1"
+            sx={{ color: theme.palette.text.secondary }}
+          >
             Тривалість: {course.duration} годин
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            {course.description}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            <strong>Навички:</strong>{" "}
-            {course.skills ? course.skills.join(", ") : "Не зазначено"}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            <strong>Викладачі:</strong>{" "}
-            {course.teachers ? course.teachers.join(", ") : "Не зазначено"}
-          </Typography>
+          <Typography variant="body1">{course.description}</Typography>
           <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate(`/dashboard/courses/${courseId}/lessons`)}
+            variant="outlined"
+            color="success"
+            sx={{ mt: 2 }}
+            onClick={() => navigate(`/dashboard/courses/${courseId}/content`)}
           >
-            Увійти до курсу
+            Почати навчання
           </Button>
-        </CardContent>
-      </Card>
+        </Box>
+      </Box>
+
+      <Divider sx={{ my: 4, backgroundColor: theme.palette.divider }} />
+
+      {/* Секція "Ви вдосконалите" */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={sectionTitleStyle}>
+          Ви вдосконалите:
+        </Typography>
+        {course.skills ? (
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 2 }}>
+            {course.skills.map((skill, index) => (
+              <Box
+                key={index}
+                sx={{
+                  padding: 1,
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "#333" : "#f0f0f0",
+                  borderRadius: "4px",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                {skill}
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Typography>Навички не зазначено</Typography>
+        )}
+      </Box>
+
+      <Divider sx={{ my: 4, backgroundColor: theme.palette.divider }} />
+
+      {/* Секція "Викладачі" */}
+      <Box>
+        <Typography variant="h5" sx={sectionTitleStyle}>
+          Викладачі:
+        </Typography>
+        {course.teachers ? (
+          <Box sx={{ mt: 2 }}>
+            {course.teachers.map((teacher, index) => (
+              <Typography key={index}>{teacher}</Typography>
+            ))}
+          </Box>
+        ) : (
+          <Typography>Викладачів не зазначено</Typography>
+        )}
+      </Box>
     </Box>
   );
 };
+
 
 
 export default StudentCourseDetails;

@@ -21,6 +21,7 @@ import CVView from "./components/CVView";
 import StudentCourses from "./pages/StudentCourses"; 
 import Skills from './pages/Skills';
 import StudentCourseDetails from "./pages/StudentCourseDetails";
+import StudentCourseContent from "./pages/StudentCourseContent";
 
 
 
@@ -74,6 +75,11 @@ const App = () => {
                 path="courses/:courseId"
                 element={<StudentCourseDetails />}
               />
+              <Route
+                path="courses/:courseId/content"
+                element={<StudentCourseContent />}
+              />
+
               <Route path="teachers" element={<Teachers />} />
               <Route
                 path="questions"

@@ -42,6 +42,7 @@ export const lightTheme = createTheme({
     divider: "#e0e0e0",
     background: {
       paper: "#ffffff",
+      div: "#f7f7f7",
       header: "#f5f5f5", // Колір для шапки таблиці у світлій темі
     },
   },
@@ -97,7 +98,8 @@ export const darkTheme = createTheme({
     },
     divider: "#424242",
     background: {
-      paper: "#121212",
+      paper: "#1D1E26",
+      div: "#272833",
       header: "#333333", // Колір для шапки таблиці у темній темі
     },
     text: {
@@ -105,6 +107,13 @@ export const darkTheme = createTheme({
     },
   },
   components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          "--paper-overlay": "unset", // Видаляємо значення
+        },
+      },
+    },
     MuiTableHead: {
       styleOverrides: {
         root: {

@@ -27,6 +27,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 
+
 const drawerWidth = 240;
 const collapsedWidth = 60;
 
@@ -167,6 +168,7 @@ return (
         flexGrow: 1,
         p: 3,
         minHeight: "100vh",
+        backgroundColor: theme.palette.background.paper,
         width: `calc(100% - ${isDrawerOpen ? drawerWidth : collapsedWidth}px)`,
         transition: theme.transitions.create("margin-left", {
           easing: theme.transitions.easing.sharp,

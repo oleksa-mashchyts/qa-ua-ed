@@ -20,8 +20,11 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import CustomModal from '../components/CustomModal';
+import { useTheme } from "@mui/material/styles";
+
 
 const Courses = () => {
+  const theme = useTheme(); 
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [filters, setFilters] = useState({
@@ -39,7 +42,7 @@ const Courses = () => {
     description: "",
     duration: "",
   });
-  const { isLoading, currentUser, theme } = useAuth();
+  const { isLoading, currentUser } = useAuth();
   const navigate = useNavigate(); // Навігація через useNavigate
 
     useEffect(() => {
@@ -273,8 +276,10 @@ const handleChange = (e) => {
       <Box
         className="filters-panel"
         sx={{
-          backgroundColor: theme === "dark" ? "#333" : "#f7f7f7",
-          color: theme === "dark" ? "#fff" : "#333",
+          backgroundColor: theme.palette.background.div,
+          color: theme.palette.text.primary,
+          boxShadow: theme.shadows[0],
+  
         }}
       >
         <Typography variant="h6" gutterBottom>

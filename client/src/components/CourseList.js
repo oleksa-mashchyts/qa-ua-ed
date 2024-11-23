@@ -13,6 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
 
 const CourseList = ({
   courses,
@@ -21,6 +22,7 @@ const CourseList = ({
   onEnter,
   onUpdateCourseImage,
 }) => {
+  const theme = useTheme();
   const [hoveredCourseId, setHoveredCourseId] = useState(null);
 
   const handleImageUpload = async (event, courseId) => {
@@ -58,7 +60,16 @@ const CourseList = ({
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
       {courses.map((course) => (
-        <Card key={course._id} sx={{ width: 480, mb: 1 }}>
+        <Card
+          key={course._id}
+          sx={{
+            width: 480,
+            backgroundColor: theme.palette.background.div,
+            color: theme.palette.text.primary,
+            mb: 1,
+            boxShadow: theme.shadows[0],
+          }}
+        >
           <Box
             onMouseEnter={() => setHoveredCourseId(course._id)}
             onMouseLeave={() => setHoveredCourseId(null)}

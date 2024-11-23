@@ -5,15 +5,16 @@ import {
   Typography,
   CardActions,
   Box,
-  IconButton,
   CardMedia,
   Button,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useTheme } from "@mui/material/styles";
 
 const StudentAllCoursesList = ({ courses }) => {
+   const theme = useTheme();
   if (courses.length === 0) {
     return <Typography variant="h6">Курси відсутні.</Typography>;
   }
@@ -21,7 +22,8 @@ const StudentAllCoursesList = ({ courses }) => {
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
       {courses.map((course) => (
-        <Card key={course._id} sx={{ width: 480, mb: 1 }}>
+        <Card key={course._id} sx={{ width: 480, mb: 1, backgroundColor: theme.palette.background.div,
+}}>
           <CardMedia
             component="img"
             height="140"
