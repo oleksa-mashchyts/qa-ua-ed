@@ -18,20 +18,21 @@ import {
   Divider,
   Checkbox,
   FormControlLabel,
+  Autocomplete,
 } from "@mui/material";
 import CustomModal from '../components/CustomModal';
 import { useTheme } from "@mui/material/styles";
 
 
 const Courses = () => {
-  const theme = useTheme(); 
+  const theme = useTheme();
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [filters, setFilters] = useState({
-      duration: [],
-      level: [],
-      skill: "",
-    });
+    duration: [],
+    level: [],
+    skill: "",
+  });
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // Стан для підтвердження видалення
   const [courseToDelete, setCourseToDelete] = useState(null); // ID курсу для видалення
@@ -42,63 +43,82 @@ const Courses = () => {
     description: "",
     duration: "",
   });
+  const [skills, setSkills] = useState([]); // Список доступних навичок
+  const [selectedSkills, setSelectedSkills] = useState([]); // Обрані навички
+  const initialCourseState = {
+    title: "",
+    description: "",
+    duration: "",
+    imageUrl: "",
+    skills: [], // Масив для навичок
+  };
+
   const { isLoading, currentUser } = useAuth();
   const navigate = useNavigate(); // Навігація через useNavigate
 
-    useEffect(() => {
-      if (!isLoading && currentUser) {
-        fetchCourses();
-      }
-    }, [isLoading, currentUser]);
-
-    useEffect(() => {
-      applyFilters();
-    }, [filters, courses]);
-
-    useEffect(() => {
+  useEffect(() => {
+    if (!isLoading && currentUser) {
       fetchCourses();
-    }, [filters]);
+    }
+  }, [isLoading, currentUser]);
 
+  useEffect(() => {
+    applyFilters();
+  }, [filters, courses]);
 
-    const applyFilters = () =>  {
-      let filtered = courses;
+  useEffect(() => {
+    fetchCourses();
+  }, [filters]);
 
-if (filters.duration.length > 0) {
-  filtered = filtered.filter((course) => {
-    return filters.duration.some((label) => {
-      const [min, max] = durationMap[label];
-      return course.duration >= min && course.duration < max;
-    });
-  });
-}
-
-if (filters.level.length > 0) {
-  filtered = filtered.filter((course) =>
-    filters.level
-      .map((label) => levelMap[label]) // Мапуємо рівні на англійські значення
-      .includes(course.level)
-  );
-}
-
-
-      if (filters.skill) {
-        filtered = filtered.filter(
-          (course) =>
-            course.skills &&
-            course.skills.some((skill) =>
-              skill.toLowerCase().includes(filters.skill.toLowerCase())
-            )
-        );
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/skills");
+        setSkills(response.data);
+      } catch (error) {
+        console.error("Помилка при завантаженні навичок:", error);
       }
-
-      setFilteredCourses(filtered);
     };
-    
-      const handleResetFilters = () => {
-        setFilters({ duration: [], level: [], skill: "" });
-      };
-      
 
+    fetchSkills();
+  }, []);
+
+  const applyFilters = () => {
+    let filtered = courses;
+
+    if (filters.duration.length > 0) {
+      filtered = filtered.filter((course) => {
+        return filters.duration.some((label) => {
+          const [min, max] = durationMap[label];
+          return course.duration >= min && course.duration < max;
+        });
+      });
+    }
+
+    if (filters.level.length > 0) {
+      filtered = filtered.filter((course) =>
+        filters.level
+          .map((label) => levelMap[label]) // Мапуємо рівні на англійські значення
+          .includes(course.level)
+      );
+    }
+
+    if (filters.skill) {
+      filtered = filtered.filter(
+        (course) =>
+          course.skills &&
+          course.skills.some((skill) =>
+            skill.toLowerCase().includes(filters.skill.toLowerCase())
+          )
+      );
+    }
+
+    setFilteredCourses(filtered);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({ duration: [], level: [], skill: "" });
+  };
 
   const handleEnterCourse = (courseId) => {
     navigate(`/dashboard/courses/${courseId}`);
@@ -120,58 +140,51 @@ if (filters.level.length > 0) {
     "Не зазначено": "not defined",
   };
 
-
-
   // Завантаження курсів із сервера
-const fetchCourses = async () => {
-  try {
-    const params = new URLSearchParams();
+  const fetchCourses = async () => {
+    try {
+      const params = new URLSearchParams();
 
-    // Додаємо параметри фільтрації за тривалістю
-    if (filters.duration.length > 0) {
-      const durations = filters.duration
-        .map((label) => durationMap[label]) // Мапуємо текстові значення у діапазони
-        .flat(); // Об'єднуємо всі діапазони в один масив
-      params.append("duration", JSON.stringify(durations)); // Передаємо у форматі JSON
+      // Додаємо параметри фільтрації за тривалістю
+      if (filters.duration.length > 0) {
+        const durations = filters.duration
+          .map((label) => durationMap[label]) // Мапуємо текстові значення у діапазони
+          .flat(); // Об'єднуємо всі діапазони в один масив
+        params.append("duration", JSON.stringify(durations)); // Передаємо у форматі JSON
+      }
+
+      // Додаємо параметри фільтрації за рівнем
+      if (filters.level.length > 0) {
+        const levels = filters.level.map((label) => levelMap[label]); // Мапуємо рівні
+        params.append("level", levels.join(","));
+      }
+
+      const response = await axios.get(
+        `http://localhost:3000/api/courses?${params.toString()}`
+      );
+      setCourses(response.data);
+      setFilteredCourses(response.data);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
     }
+  };
 
-    // Додаємо параметри фільтрації за рівнем
-    if (filters.level.length > 0) {
-      const levels = filters.level.map((label) => levelMap[label]); // Мапуємо рівні
-      params.append("level", levels.join(","));
-    }
-
-    const response = await axios.get(
-      `http://localhost:3000/api/courses?${params.toString()}`
-    );
-    setCourses(response.data);
-    setFilteredCourses(response.data);
-  } catch (error) {
-    console.error("Error fetching courses:", error);
-  }
-};
-
-
-
-
-    const handleFilterChange = (category, value) => {
-      setFilters((prev) => {
-        const newFilters = { ...prev };
-        if (category === "skill") {
-          newFilters.skill = value;
+  const handleFilterChange = (category, value) => {
+    setFilters((prev) => {
+      const newFilters = { ...prev };
+      if (category === "skill") {
+        newFilters.skill = value;
+      } else {
+        const values = newFilters[category];
+        if (values.includes(value)) {
+          newFilters[category] = values.filter((v) => v !== value);
         } else {
-          const values = newFilters[category];
-          if (values.includes(value)) {
-            newFilters[category] = values.filter((v) => v !== value);
-          } else {
-            newFilters[category] = [...values, value];
-          }
+          newFilters[category] = [...values, value];
         }
-        return newFilters;
-      });
-    };
-
-
+      }
+      return newFilters;
+    });
+  };
 
   // Функція для оновлення зображення курсу без перезавантаження сторінки
   const handleUpdateCourseImage = (courseId, newImageUrl) => {
@@ -187,9 +200,9 @@ const handleSaveCourse = async (e) => {
   e.preventDefault();
   try {
     if (isEditing) {
-      const response = await axios.put(
-        `http://localhost:3000/api/courses/${editingCourse._id}`,
-        newCourse
+      const response = await axios.patch(
+        `http://localhost:3000/api/courses/${editingCourse._id}/skills`,
+        { skills: newCourse.skills }
       );
       setCourses((prevCourses) =>
         prevCourses.map((course) =>
@@ -197,17 +210,19 @@ const handleSaveCourse = async (e) => {
         )
       );
     } else {
-      const response = await axios.post(
-        "http://localhost:3000/api/courses",
-        newCourse
-      );
+      const response = await axios.post("http://localhost:3000/api/courses", {
+        ...newCourse,
+        skills: newCourse.skills, // Надсилаємо IDs
+      });
       setCourses((prevCourses) => [...prevCourses, response.data]);
     }
     handleClose();
   } catch (error) {
-    console.error("Error saving course:", error);
+    console.error("Помилка при збереженні курсу:", error);
   }
 };
+
+
 
 
   // Видалення курсу
@@ -236,39 +251,53 @@ const handleSaveCourse = async (e) => {
   };
 
   // Відкриття форми для додавання/редагування
- const handleOpen = (course = null) => {
-   if (course) {
-     setIsEditing(true);
-     setEditingCourse(course);
-     setNewCourse({
-       title: course.title,
-       description: course.description,
-       duration: course.duration,
-       level: course.level || "not defined", // Додаємо рівень
-     });
-   } else {
-     setIsEditing(false);
-     setNewCourse({
-       title: "",
-       description: "",
-       duration: "",
-       level: "not defined", // Початкове значення
-     });
-   }
-   setOpen(true);
- };
+const handleOpen = async (course = null) => {
+  if (course) {
+    setIsEditing(true);
+    setEditingCourse(course);
 
-
-  const handleClose = () => {
-    setOpen(false);
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/courses/${course._id}`
+      );
+      const currentSkills = response.data.skills || [];
+      const fullSkills = currentSkills.map((skillId) =>
+        skills.find((skill) => skill._id === skillId)
+      ); // Перетворюємо IDs у повні об'єкти
+      setSelectedSkills(fullSkills);
+      setNewCourse({
+        ...course,
+        skills: currentSkills, // IDs навичок
+      });
+    } catch (error) {
+      console.error("Помилка при завантаженні навичок курсу:", error);
+    }
+  } else {
+    setIsEditing(false);
     setEditingCourse(null);
-  };
+    setNewCourse(initialCourseState);
+    setSelectedSkills([]);
+  }
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setNewCourse((prev) => ({ ...prev, [name]: value }));
+  setOpen(true);
 };
 
+
+
+
+const handleClose = () => {
+  setOpen(false);
+  setEditingCourse(null);
+  setNewCourse(initialCourseState);
+  setSelectedSkills([]); // Очищуємо обрані навички
+};
+
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewCourse((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
     <Box sx={{ display: "flex", padding: 2, gap: 2 }}>
@@ -279,7 +308,6 @@ const handleChange = (e) => {
           backgroundColor: theme.palette.background.div,
           color: theme.palette.text.primary,
           boxShadow: theme.shadows[0],
-  
         }}
       >
         <Typography variant="h6" gutterBottom>
@@ -353,7 +381,7 @@ const handleChange = (e) => {
           sx={{
             textAlign: "center",
             padding: 2,
-            backgroundColor: theme === "dark" ? "#444" : "#e0e0e0",
+            backgroundColor: theme === "dark" ? "secondary" : "secondary",
             borderRadius: "8px",
             marginTop: "16px",
           }}
@@ -432,6 +460,30 @@ const handleChange = (e) => {
                 </option>
               ))}
             </TextField>
+
+            <Autocomplete
+              multiple
+              options={skills}
+              getOptionLabel={(option) => option.name || "Невідомо"}
+              value={selectedSkills} // Повні об'єкти
+              onChange={(event, newValue) => {
+                setSelectedSkills(newValue); // Зберігаємо об'єкти в стані
+                setNewCourse((prev) => ({
+                  ...prev,
+                  skills: newValue.map((skill) => skill._id), // IDs для сервера
+                }));
+              }}
+              isOptionEqualToValue={(option, value) => option._id === value._id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Навички"
+                  placeholder="Оберіть навички"
+                />
+              )}
+              sx={{ marginBottom: 2 }}
+            />
+
             <TextField
               label="Тривалість (години)"
               name="duration"
@@ -473,7 +525,6 @@ const handleChange = (e) => {
       </Box>
     </Box>
   );
-
 };
 
 export default Courses;

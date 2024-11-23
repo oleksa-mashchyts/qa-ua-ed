@@ -49,6 +49,12 @@ const courseSchema = new mongoose.Schema({
       ref: "Lesson", // посилання на модель Lesson
     },
   ],
+  skills: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skill", // Зв'язок з моделлю Skill
+    },
+  ],
 });
 
 const Course = mongoose.model('Course', courseSchema);

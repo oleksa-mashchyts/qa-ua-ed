@@ -86,31 +86,36 @@ router.get("/", async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Course'
  */
-router.post('/', async (req, res) => {
-  const { title, description, duration } = req.body;
-
-  // Логування отриманих даних
-  console.log('Received data:', req.body);
+router.post("/", async (req, res) => {
+  const { title, description, duration, skills } = req.body;
 
   // Перевірка наявності поля duration
   if (duration == null) {
-      return res.status(400).json({ message: 'Duration is required' });
+    return res.status(400).json({ message: "Duration is required" });
   }
 
   const course = new Course({
-      title,
-      description,
-      duration
+    title,
+    description,
+    duration,
+    skills: skills || [], // Додаємо навички, якщо вони передані
   });
 
   try {
-      const newCourse = await course.save();
-      res.status(201).json(newCourse);
+    const newCourse = await course.save();
+
+    // Популяція навичок для відповіді
+    const populatedCourse = await Course.findById(newCourse._id).populate(
+      "skills"
+    );
+
+    res.status(201).json(populatedCourse);
   } catch (err) {
-      console.error(err); // Логування помилки для діагностики
-      res.status(400).json({ message: err.message });
+    console.error(err); // Логування помилки для діагностики
+    res.status(400).json({ message: err.message });
   }
 });
+
 
 // Отримати курс за ID
 /**
@@ -224,6 +229,26 @@ router.get("/count", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.patch("/:id/skills", async (req, res) => {
+  const { skills } = req.body;
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({ message: "Курс не знайдено" });
+    }
+    course.skills = skills; // Оновлюємо список навичок
+    const updatedCourse = await course.save();
+    const populatedCourse = await Course.findById(updatedCourse._id).populate(
+      "skills"
+    ); // Повертаємо навички з їх деталями
+    res.json(populatedCourse);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
 
 
 
