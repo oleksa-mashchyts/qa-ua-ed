@@ -31,6 +31,8 @@ router.get("/count", async (req, res) => {
  */
 
 router.get("/", async (req, res) => {
+
+  
   const { duration, level, skills } = req.query;
 
   const filter = {};
@@ -155,17 +157,28 @@ router.post("/", async (req, res) => {
  *       404:
  *         description: Course not found
  */
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    // Отримуємо курс за ID
+    const course = await Course.findById(req.params.id).populate("skills"); // Популяція навичок
+
     if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      return res.status(404).json({ message: "Курс не знайдено" });
     }
-    res.json(course);
+
+    // Додаємо будь-яку іншу необхідну логіку тут
+    const enrichedData = {
+      ...course.toObject(),
+      additionalInfo: "Додаткова інформація, якщо потрібно", // Приклад додаткових даних
+    };
+
+    res.json(enrichedData); // Повертаємо курс із додатковими полями
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Помилка при отриманні курсу:", error);
+    res.status(500).json({ message: "Сталася помилка на сервері" });
   }
 });
+
 
 // Оновити курс
 router.patch('/:id', async (req, res) => {

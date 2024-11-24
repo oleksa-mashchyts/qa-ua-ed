@@ -120,7 +120,7 @@ const StudentCourseDetails = () => {
         <Typography variant="h5" sx={sectionTitleStyle}>
           Ви вдосконалите:
         </Typography>
-        {course.skills ? (
+        {course.skills && course.skills.length > 0 ? (
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 2 }}>
             {course.skills.map((skill, index) => (
               <Box
@@ -133,7 +133,7 @@ const StudentCourseDetails = () => {
                   color: theme.palette.text.primary,
                 }}
               >
-                {skill}
+                {skill.name} {/* Відображаємо назву навички */}
               </Box>
             ))}
           </Box>
