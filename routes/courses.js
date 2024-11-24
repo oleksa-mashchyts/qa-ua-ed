@@ -40,7 +40,12 @@ router.get("/", async (req, res) => {
     try {
       const durations = JSON.parse(duration);
       if (durations.length === 2) {
-        filter.duration = { $gte: durations[0], $lt: durations[1] };
+        if (durations[1] === null) {
+          // Якщо верхня межа відсутня, шукаємо значення більше або рівне мінімуму
+          filter.duration = { $gte: durations[0] };
+        } else {
+          filter.duration = { $gte: durations[0], $lt: durations[1] };
+        }
       }
     } catch (error) {
       return res
