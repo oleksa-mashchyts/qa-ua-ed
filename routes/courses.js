@@ -31,16 +31,16 @@ router.get("/count", async (req, res) => {
  */
 
 router.get("/", async (req, res) => {
-  const { duration, level } = req.query;
+  const { duration, level, skills } = req.query;
 
   const filter = {};
 
   // Фільтрація за тривалістю
   if (duration) {
     try {
-      const durations = JSON.parse(duration); // Очікуємо масив числових діапазонів
+      const durations = JSON.parse(duration);
       if (durations.length === 2) {
-        filter.duration = { $gte: durations[0], $lt: durations[1] }; // Мінімум і максимум
+        filter.duration = { $gte: durations[0], $lt: durations[1] };
       }
     } catch (error) {
       return res
@@ -55,13 +55,22 @@ router.get("/", async (req, res) => {
     filter.level = { $in: levels };
   }
 
+  // Фільтрація за навичками
+  if (skills) {
+    const skillIds = skills.split(",");
+    filter.skills = { $in: skillIds }; // Пошук курсів із хоча б однією навичкою
+  }
+
   try {
-    const courses = await Course.find(filter);
+    // Запит із повним фільтром
+    const courses = await Course.find(filter).populate("skills");
     res.json(courses);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 });
+
 
 
 

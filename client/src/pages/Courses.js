@@ -43,6 +43,7 @@ const Courses = () => {
     description: "",
     duration: "",
   });
+  const [selectedSkill, setSelectedSkill] = useState(null); // Обрана навичка
   const [skills, setSkills] = useState([]); // Список доступних навичок
   const [selectedSkills, setSelectedSkills] = useState([]); // Обрані навички
   const initialCourseState = {
@@ -103,21 +104,21 @@ const Courses = () => {
       );
     }
 
-    if (filters.skill) {
-      filtered = filtered.filter(
-        (course) =>
-          course.skills &&
-          course.skills.some((skill) =>
-            skill.toLowerCase().includes(filters.skill.toLowerCase())
-          )
-      );
-    }
+
+  if (filters.skills && filters.skills.length > 0) {
+    filtered = filtered.filter(
+      (course) =>
+        course.skills &&
+        course.skills.some((skill) => filters.skills.includes(skill._id))
+    );
+  }
 
     setFilteredCourses(filtered);
   };
 
   const handleResetFilters = () => {
-    setFilters({ duration: [], level: [], skill: "" });
+    setFilters({ duration: [], level: [], skills: [] });
+    setSelectedSkills([]);
   };
 
   const handleEnterCourse = (courseId) => {
@@ -159,6 +160,11 @@ const Courses = () => {
         params.append("level", levels.join(","));
       }
 
+      // Додаємо параметри фільтрації за навичкою
+    if (filters.skills && filters.skills.length > 0) {
+      params.append("skills", filters.skills.join(",")); // Передаємо IDs навичок як список
+    }
+
       const response = await axios.get(
         `http://localhost:3000/api/courses?${params.toString()}`
       );
@@ -196,34 +202,31 @@ const Courses = () => {
   };
 
   // Збереження курсу
-const handleSaveCourse = async (e) => {
-  e.preventDefault();
-  try {
-    if (isEditing) {
-      const response = await axios.patch(
-        `http://localhost:3000/api/courses/${editingCourse._id}/skills`,
-        { skills: newCourse.skills }
-      );
-      setCourses((prevCourses) =>
-        prevCourses.map((course) =>
-          course._id === editingCourse._id ? response.data : course
-        )
-      );
-    } else {
-      const response = await axios.post("http://localhost:3000/api/courses", {
-        ...newCourse,
-        skills: newCourse.skills, // Надсилаємо IDs
-      });
-      setCourses((prevCourses) => [...prevCourses, response.data]);
+  const handleSaveCourse = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditing) {
+        const response = await axios.patch(
+          `http://localhost:3000/api/courses/${editingCourse._id}/skills`,
+          { skills: newCourse.skills }
+        );
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course._id === editingCourse._id ? response.data : course
+          )
+        );
+      } else {
+        const response = await axios.post("http://localhost:3000/api/courses", {
+          ...newCourse,
+          skills: newCourse.skills, // Надсилаємо IDs
+        });
+        setCourses((prevCourses) => [...prevCourses, response.data]);
+      }
+      handleClose();
+    } catch (error) {
+      console.error("Помилка при збереженні курсу:", error);
     }
-    handleClose();
-  } catch (error) {
-    console.error("Помилка при збереженні курсу:", error);
-  }
-};
-
-
-
+  };
 
   // Видалення курсу
   const handleDeleteCourse = async () => {
@@ -251,48 +254,43 @@ const handleSaveCourse = async (e) => {
   };
 
   // Відкриття форми для додавання/редагування
-const handleOpen = async (course = null) => {
-  if (course) {
-    setIsEditing(true);
-    setEditingCourse(course);
+  const handleOpen = async (course = null) => {
+    if (course) {
+      setIsEditing(true);
+      setEditingCourse(course);
 
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/courses/${course._id}`
-      );
-      const currentSkills = response.data.skills || [];
-      const fullSkills = currentSkills.map((skillId) =>
-        skills.find((skill) => skill._id === skillId)
-      ); // Перетворюємо IDs у повні об'єкти
-      setSelectedSkills(fullSkills);
-      setNewCourse({
-        ...course,
-        skills: currentSkills, // IDs навичок
-      });
-    } catch (error) {
-      console.error("Помилка при завантаженні навичок курсу:", error);
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/courses/${course._id}`
+        );
+        const currentSkills = response.data.skills || [];
+        const fullSkills = currentSkills.map((skillId) =>
+          skills.find((skill) => skill._id === skillId)
+        ); // Перетворюємо IDs у повні об'єкти
+        setSelectedSkills(fullSkills);
+        setNewCourse({
+          ...course,
+          skills: currentSkills, // IDs навичок
+        });
+      } catch (error) {
+        console.error("Помилка при завантаженні навичок курсу:", error);
+      }
+    } else {
+      setIsEditing(false);
+      setEditingCourse(null);
+      setNewCourse(initialCourseState);
+      setSelectedSkills([]);
     }
-  } else {
-    setIsEditing(false);
+
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
     setEditingCourse(null);
     setNewCourse(initialCourseState);
-    setSelectedSkills([]);
-  }
-
-  setOpen(true);
-};
-
-
-
-
-const handleClose = () => {
-  setOpen(false);
-  setEditingCourse(null);
-  setNewCourse(initialCourseState);
-  setSelectedSkills([]); // Очищуємо обрані навички
-};
-
-
+    setSelectedSkills([]); // Очищуємо обрані навички
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -357,15 +355,28 @@ const handleClose = () => {
           )}
         </Box>
 
-        <Typography variant="subtitle1" sx={{ mt: 2 }}>
-          Навички
-        </Typography>
-        <TextField
-          value={filters.skill}
-          onChange={(e) => handleFilterChange("skill", e.target.value)}
-          placeholder="Введіть навичку"
-          size="small"
-          fullWidth
+
+        <Autocomplete
+          multiple
+          options={skills}
+          getOptionLabel={(option) => option.name || "Невідома навичка"}
+          value={selectedSkills} // Масив об'єктів
+          onChange={(event, newValue) => {
+            setSelectedSkills(newValue); // Оновлюємо об'єкти у стані
+            setFilters((prev) => ({
+              ...prev,
+              skills: newValue.map((skill) => skill._id), // Оновлюємо масив ID у фільтрі
+            }));
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Навички"
+              placeholder="Оберіть навички"
+            />
+          )}
+          isOptionEqualToValue={(option, value) => option._id === value._id}
+          sx={{ marginBottom: 2 }}
         />
 
         <Button
